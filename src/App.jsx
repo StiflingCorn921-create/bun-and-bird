@@ -1,19 +1,25 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { siteContent } from './data/siteContent';
+import { Layout } from './components/Layout';
+import Home from './pages/Home';
+import Menu from './pages/Menu';
+import ItemDetails from './pages/ItemDetails';
+import CartPage from './pages/CartPage';
+import Branches from './pages/Branches';
+import NotFound from './pages/NotFound';
 
 export default function App() {
   return (
     <BrowserRouter>
-      <main className="min-h-screen bg-cream text-charcoal font-sans flex items-center justify-center p-6">
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-ketchup tracking-tight">
-            {siteContent.brand.name}
-          </h1>
-          <p className="mt-2 text-lg text-charcoal-muted">
-            {siteContent.brand.tagline}
-          </p>
-        </div>
-      </main>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="menu" element={<Menu />} />
+          <Route path="menu/:id" element={<ItemDetails />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="branches" element={<Branches />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }
