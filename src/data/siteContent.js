@@ -104,12 +104,14 @@ export const siteContent = {
     addedNotification: 'Added to your cart!',
     notFoundTitle: 'Menu Item Not Found',
     notFoundSubtitle: 'Sorry, the item you are looking for does not exist or has been removed from the menu.',
+    notFoundEmoji: '🍟',
     backToMenuBtn: 'Browse Full Menu',
   },
 
   cart: {
     title: 'Your Order Cart',
     subtitle: 'Review your selected items and proceed with fast checkout.',
+    emptyEmoji: '🛍️',
     emptyTitle: 'Your cart is hungry!',
     emptySubtitle: 'You have not added any delicious burgers or crispy chicken to your cart yet.',
     browseMenuBtn: 'Explore the Menu',
@@ -163,6 +165,7 @@ export const siteContent = {
   },
 
   confirmation: {
+    partyEmoji: '🎉',
     title: 'Order Confirmed!',
     subtitle: 'Thank you for ordering with Bun & Bird. Your food is being prepared fresh.',
     orderIdLabel: 'Order Reference ID:',
@@ -221,5 +224,11 @@ export const siteContent = {
     backBtn: 'Back',
     itemsBadgeSingle: 'item',
     itemsBadgePlural: 'items',
+    timesSymbol: '×',
+    bullet: '•',
+    separator: ', ',
+    plus: '+',
+    minus: '-',
+    dash: '—',
   },
 };

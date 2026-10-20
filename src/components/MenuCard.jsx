@@ -84,7 +84,7 @@ export function MenuCard({ item }) {
         {isCombo && Array.isArray(item.includedItems) && item.includedItems.length > 0 && (
           <div className="mt-2 text-xs text-charcoal/70 bg-charcoal/5 px-2.5 py-1.5 rounded-lg line-clamp-1">
             <span className="font-bold">{siteContent.itemDetails.includedItemsTitle} </span>
-            {item.includedItems.map((inc) => inc.name).join(', ')}
+            {item.includedItems.map((inc) => inc.name).join(siteContent.common.separator)}
           </div>
         )}
       </div>

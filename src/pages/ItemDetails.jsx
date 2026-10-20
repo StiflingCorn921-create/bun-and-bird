@@ -23,7 +23,9 @@ export default function ItemDetails() {
   if (!item) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-6">
-        <span className="text-7xl block select-none">🍟</span>
+        <span className="text-7xl block select-none">
+          {siteContent.itemDetails.notFoundEmoji}
+        </span>
         <h1 className="text-3xl sm:text-4xl font-black text-charcoal">
           {siteContent.itemDetails.notFoundTitle}
         </h1>
@@ -194,7 +196,8 @@ export default function ItemDetails() {
                         </span>
                       </div>
                       <span className="text-xs sm:text-sm font-bold text-ketchup whitespace-nowrap">
-                        +{currency}
+                        {siteContent.common.plus}
+                        {currency}
                         {addOn.price}
                       </span>
                     </label>
@@ -259,7 +262,7 @@ export default function ItemDetails() {
                 />
               </svg>
               <span>{siteContent.itemDetails.addToCartBtn}</span>
-              <span>•</span>
+              <span>{siteContent.common.bullet}</span>
               <span>
                 {currency}
                 {totalPrice.toFixed(2)}

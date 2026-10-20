@@ -4,6 +4,7 @@ import { siteContent } from '../data/siteContent';
 import { branches } from '../data';
 import { useCart } from '../context/CartContext';
 import { Order } from '../models/Order';
+import { DELIVERY_FEE } from '../models/Cart';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { QuantitySelector } from '../components/QuantitySelector';
@@ -146,7 +147,9 @@ export default function CartPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-8 animate-in fade-in duration-300">
         {/* Success Header */}
         <div className="text-center space-y-3 bg-amber-100/60 border-2 border-mustard rounded-3xl p-6 sm:p-10 shadow-sm">
-          <span className="text-6xl sm:text-7xl block select-none">🎉</span>
+          <span className="text-6xl sm:text-7xl block select-none">
+            {siteContent.confirmation.partyEmoji}
+          </span>
           <h1 className="text-3xl sm:text-4xl font-black text-charcoal">
             {siteContent.confirmation.title}
           </h1>
@@ -298,12 +301,12 @@ export default function CartPage() {
                       <span className="text-xl select-none">{item.menuItem?.image}</span>
                       <div>
                         <span className="font-bold text-charcoal">
-                          {item.quantity}x {item.menuItem?.name}
+                          {item.quantity} {siteContent.common.timesSymbol} {item.menuItem?.name}
                         </span>
                         {item.selectedAddOns?.length > 0 && (
                           <p className="text-xs text-charcoal-muted">
                             {siteContent.cart.itemAddOnsPrefix}
-                            {item.selectedAddOns.map((a) => a.name).join(', ')}
+                            {item.selectedAddOns.map((a) => a.name).join(siteContent.common.separator)}
                           </p>
                         )}
                       </div>
@@ -349,7 +352,7 @@ export default function CartPage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
         <EmptyState
-          emoji="🛍️"
+          emoji={siteContent.cart.emptyEmoji}
           title={siteContent.cart.emptyTitle}
           subtitle={siteContent.cart.emptySubtitle}
           actionLabel={siteContent.cart.browseMenuBtn}
@@ -417,7 +420,7 @@ export default function CartPage() {
                             <span className="font-bold">{siteContent.cart.itemAddOnsPrefix}</span>
                             {item.selectedAddOns.map((a) => (
                               <span key={a.id} className="bg-amber-100/70 px-1.5 py-0.5 rounded text-charcoal">
-                                {a.name} (+{currency}{a.price})
+                                {a.name} ({siteContent.common.plus}{currency}{a.price})
                               </span>
                             ))}
                           </div>
@@ -497,7 +500,7 @@ export default function CartPage() {
                       {siteContent.cart.deliveryOption}
                     </span>
                     <span className="text-xs font-bold text-ketchup">
-                      +{currency}49
+                      {siteContent.common.plus}{currency}{DELIVERY_FEE}
                     </span>
                   </div>
                   <p className="text-xs text-charcoal-muted">
@@ -521,7 +524,7 @@ export default function CartPage() {
                 <option value="">{siteContent.cart.branchSelectPlaceholder}</option>
                 {branches.map((b) => (
                   <option key={b.id} value={b.id}>
-                    {b.name} — {b.address}
+                    {b.name} {siteContent.common.dash} {b.address}
                   </option>
                 ))}
               </select>
@@ -681,7 +684,7 @@ export default function CartPage() {
                   <div className="flex items-center justify-between text-green-700">
                     <span className="font-medium">{siteContent.cart.discountLabel}</span>
                     <span className="font-bold">
-                      -{currency}
+                      {siteContent.common.minus}{currency}
                       {cart.getDiscount().toFixed(2)}
                     </span>
                   </div>
