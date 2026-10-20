@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { siteContent } from '../data/siteContent';
+import { useCart } from '../context/CartContext';
 
-export function Header({ itemCount = 0 }) {
+export function Header({ itemCount: propItemCount }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { itemCount: contextItemCount } = useCart();
+  const itemCount = propItemCount !== undefined ? propItemCount : contextItemCount;
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(prev => !prev);
