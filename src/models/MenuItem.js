@@ -26,3 +26,4 @@ export class MenuItem {
     return nameMatch || descMatch || tagMatch;
   }
 }
+

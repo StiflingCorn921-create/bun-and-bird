@@ -5,3 +5,4 @@ export class AddOn {
     this.price = Number(price);
   }
 }
+

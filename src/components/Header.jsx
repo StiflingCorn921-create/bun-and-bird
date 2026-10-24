@@ -34,9 +34,11 @@ export function Header({ itemCount: propItemCount }) {
             aria-label={siteContent.nav.brandAria}
             className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-ketchup rounded-lg p-1"
           >
-            <span className="text-3xl md:text-4xl transition-transform group-hover:scale-110 select-none">
-              {siteContent.brand.logoEmoji}
-            </span>
+            <img
+              src="/public/images/Bun&Bird logo.jpg "
+              alt={siteContent.brand.logoAlt}
+              className="w-11 h-11 object-contain transition-transform group-hover:scale-110"
+            />
             <div className="flex flex-col">
               <span className="text-xl md:text-2xl font-black tracking-tight text-ketchup uppercase">
                 {siteContent.brand.name}

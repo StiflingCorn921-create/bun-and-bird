@@ -45,3 +45,4 @@ export function SearchBar({ value, onChange, onClear, className = '' }) {
     </div>
   );
 }
+

@@ -14,3 +14,4 @@ export function Badge({ children, variant = 'mustard', className = '' }) {
     </span>
   );
 }
+

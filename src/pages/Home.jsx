@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { siteContent } from '../data/siteContent';
 import { combos, allMenuItems } from '../data';
@@ -6,6 +7,16 @@ import { SectionHeading } from '../components/SectionHeading';
 import { Badge } from '../components/Badge';
 
 export default function Home() {
+  const heroEmojis = siteContent.brand.heroEmojis || [siteContent.brand.logoEmoji];
+  const [emojiIndex, setEmojiIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setEmojiIndex((prev) => (prev + 1) % heroEmojis.length);
+    }, 1800);
+    return () => clearInterval(timer);
+  }, [heroEmojis.length]);
+
   // Best seller items
   const bestSellers = allMenuItems
     .filter((item) => Array.isArray(item.tags) && item.tags.includes('best seller'))
@@ -56,7 +67,7 @@ export default function Home() {
               <div className="relative w-72 h-72 sm:w-96 sm:h-96 rounded-3xl bg-amber-200/50 border-4 border-mustard/40 flex items-center justify-center shadow-2xl p-6 select-none">
                 <div className="text-center space-y-4">
                   <div className="text-8xl sm:text-9xl animate-bounce">
-                    {siteContent.brand.logoEmoji}
+                    {heroEmojis[emojiIndex]}
                   </div>
                   <div className="inline-block bg-charcoal text-cream text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
                     {siteContent.brand.tagline}

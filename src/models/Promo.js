@@ -16,3 +16,4 @@ export class Promo {
     return 0;
   }
 }
+

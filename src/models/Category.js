@@ -4,3 +4,4 @@ export class Category {
     this.label = label;
   }
 }
+

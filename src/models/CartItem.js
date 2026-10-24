@@ -14,3 +14,4 @@ export class CartItem {
     return (this.menuItem.price + addOnsTotal) * this.quantity;
   }
 }
+

@@ -116,3 +116,4 @@ During checkout on the `/cart` page, test any of the following voucher codes:
 - `BUNBIRD10` — 10% discount on food subtotal
 - `SAVE50` — ₱50 fixed discount
 - `FREESHIP` — Free delivery on doorstep orders
+

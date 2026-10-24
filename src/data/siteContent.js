@@ -1,8 +1,14 @@
 export const siteContent = {
   brand: {
     name: 'Bun & Bird',
+    namePart1: 'BUN ',
+    nameAmpersand: '&',
+    namePart2: ' BIRD',
     tagline: 'Crispy, Juicy, Flame-Grilled Goodness',
     logoEmoji: '🍔',
+    heroEmojis: ['🍔', '🍗', '🍟', '🥔'],
+    logoImage: '/images/logo.jpg',
+    logoAlt: 'Bun & Bird Burgers & Chicken Logo',
     shortDesc: "Manila's premier destination for smashed gourmet burgers and golden double-dredged fried chicken.",
   },
 
@@ -189,13 +195,19 @@ export const siteContent = {
   },
 
   branches: {
-    title: 'Our Branches',
-    subtitle: 'Find a Bun & Bird branch near you across Metro Manila. Visit us for dine-in, takeout, or pickup.',
+    eyebrow: 'FIND US NEARBY',
+    title: 'Branches',
+    subtitle: 'Four locations, one menu. Choose the branch that works for you.',
     openBadge: 'Open for Orders',
-    phoneLabel: 'Phone:',
-    hoursLabel: 'Operating Hours:',
-    addressLabel: 'Address:',
+    locationPrefix: 'LOCATION 0',
+    branchBannerPrefix: 'BRANCH 0',
+    phoneLabel: 'PHONE',
+    hoursLabel: 'HOURS',
+    addressLabel: 'ADDRESS',
     orderFromBranchBtn: 'Order for Pickup Here',
+    carouselHint: '(carousel scrolling, hold to scroll)',
+    scrollPrevAria: 'Scroll branches left',
+    scrollNextAria: 'Scroll branches right',
   },
 
   notFound: {
@@ -232,3 +244,4 @@ export const siteContent = {
     dash: '—',
   },
 };
+

@@ -35,3 +35,4 @@ export function CategoryTabs({ categories = [], selectedCategory = 'all', onSele
     </div>
   );
 }
+

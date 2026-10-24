@@ -7,3 +7,4 @@ export class Branch {
     this.phone = phone;
   }
 }
+

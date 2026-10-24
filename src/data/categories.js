@@ -8,3 +8,4 @@ export const categories = [
   new Category({ id: 'drinks', label: 'Drinks' }),
   new Category({ id: 'desserts', label: 'Desserts' }),
 ];
+

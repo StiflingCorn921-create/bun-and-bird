@@ -13,3 +13,4 @@ export function Layout({ itemCount }) {
     </div>
   );
 }
+
