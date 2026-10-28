@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { siteContent } from '../data/siteContent';
 import { branches } from '../data';
 import { useCart } from '../context/CartContext';
-import { Order } from '../models/Order';
+import { useAuth } from '../context/AuthContext';
+import { orderService, SERVICED_DELIVERY_AREAS } from '../services/orderService';
 import { DELIVERY_FEE } from '../models/Cart';
 import { Button } from '../components/Button';
 import { Badge } from '../components/Badge';
 import { QuantitySelector } from '../components/QuantitySelector';
 import { EmptyState } from '../components/EmptyState';
+import { FoodImage } from '../components/FoodImage';
 
 export default function CartPage() {
   const {
@@ -21,11 +23,40 @@ export default function CartPage() {
     clearCart,
   } = useCart();
 
+  const { user, isAuthenticated, login, signup, logout } = useAuth();
+
+  // Auth form state (for inline login/signup when not logged in)
+  const [authTab, setAuthTab] = useState('login'); // 'login' | 'signup'
+  const [authName, setAuthName] = useState('');
+  const [authIdentifier, setAuthIdentifier] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+
   // Form state
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [deliveryAreaId, setDeliveryAreaId] = useState(SERVICED_DELIVERY_AREAS[0]?.id || '');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [selectedBranchId, setSelectedBranchId] = useState(branches[0]?.id || '');
+  const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery');
+
+  // Pre-fill user data when authenticated
+  useEffect(() => {
+    if (user) {
+      if (user.name && !customerName) setCustomerName(user.name);
+      if (user.phone && !customerPhone) setCustomerPhone(user.phone);
+      if (user.address && !deliveryAddress) setDeliveryAddress(user.address);
+    }
+  }, [user]);
+
+  // When delivery area changes, auto-suggest the closest branch
+  const handleAreaChange = (areaId) => {
+    setDeliveryAreaId(areaId);
+    const area = SERVICED_DELIVERY_AREAS.find((a) => a.id === areaId);
+    if (area && area.branchId) {
+      setSelectedBranchId(area.branchId);
+    }
+  };
 
   // Promo state
   const [promoInput, setPromoInput] = useState('');
@@ -64,9 +95,40 @@ export default function CartPage() {
     setPromoMessage({ type: null, text: '' });
   };
 
+  // Handle inline quick auth submit
+  const handleAuthSubmit = (e) => {
+    e.preventDefault();
+    setAuthError('');
+    try {
+      if (authTab === 'login') {
+        const loggedUser = login({
+          identifier: authIdentifier,
+          password: authPassword,
+        });
+        setCustomerName(loggedUser.name || '');
+        setCustomerPhone(loggedUser.phone || '');
+      } else {
+        const newUser = signup({
+          name: authName,
+          email: authIdentifier.includes('@') ? authIdentifier : '',
+          phone: !authIdentifier.includes('@') ? authIdentifier : '',
+          password: authPassword,
+        });
+        setCustomerName(newUser.name);
+        setCustomerPhone(newUser.phone);
+      }
+    } catch (err) {
+      setAuthError(err.message || 'Authentication failed. Please check inputs.');
+    }
+  };
+
   // Form validation
   const validateForm = () => {
     const newErrors = {};
+
+    if (!isAuthenticated) {
+      newErrors.auth = siteContent.checkout.validationErrors.authRequired;
+    }
 
     if (!customerName.trim()) {
       newErrors.name = siteContent.checkout.validationErrors.nameRequired;
@@ -79,8 +141,13 @@ export default function CartPage() {
       newErrors.phone = siteContent.checkout.validationErrors.phoneInvalid;
     }
 
-    if (cart.orderType === 'delivery' && !deliveryAddress.trim()) {
-      newErrors.address = siteContent.checkout.validationErrors.addressRequired;
+    if (cart.orderType === 'delivery') {
+      if (!deliveryAreaId || deliveryAreaId === 'outside') {
+        newErrors.area = siteContent.checkout.validationErrors.areaRequired;
+      }
+      if (!deliveryAddress.trim()) {
+        newErrors.address = siteContent.checkout.validationErrors.addressRequired;
+      }
     }
 
     if (!selectedBranchId) {
@@ -101,10 +168,10 @@ export default function CartPage() {
     if (!validateForm()) return;
 
     const branch = branches.find((b) => b.id === selectedBranchId) || branches[0];
+    const chosenArea = SERVICED_DELIVERY_AREAS.find((a) => a.id === deliveryAreaId);
 
-    const newOrder = new Order({
-      id: `BNB-${Math.floor(100000 + Math.random() * 900000)}`,
-      items: [...cart.items],
+    const newOrder = orderService.createOrder({
+      items: cart.items,
       customer: {
         name: customerName.trim(),
         phone: customerPhone.trim(),
@@ -113,7 +180,8 @@ export default function CartPage() {
       orderType: cart.orderType,
       branch: branch,
       total: cart.getTotal(),
-      status: 'Preparing',
+      paymentMethod: paymentMethod,
+      deliveryArea: chosenArea ? chosenArea.name : null,
     });
 
     setPlacedOrder(newOrder);
@@ -124,18 +192,14 @@ export default function CartPage() {
   // Advance live order status
   const handleAdvanceStatus = () => {
     if (!placedOrder) return;
-    placedOrder.advanceStatus();
-    // Create new order instance to trigger re-render
+    const nextStatus = orderService.advanceStatus(placedOrder.status);
+    placedOrder.status = nextStatus;
     setPlacedOrder(
-      new Order({
-        id: placedOrder.id,
-        items: placedOrder.items,
-        customer: placedOrder.customer,
-        orderType: placedOrder.orderType,
-        branch: placedOrder.branch,
-        total: placedOrder.total,
-        status: placedOrder.status,
-      })
+      Object.assign(
+        Object.create(Object.getPrototypeOf(placedOrder)),
+        placedOrder,
+        { status: nextStatus }
+      )
     );
   };
 
@@ -202,20 +266,16 @@ export default function CartPage() {
                   key={step}
                   className={`p-3 rounded-2xl border-2 transition-all ${
                     isCurrent
-                      ? 'border-ketchup bg-amber-100/80 shadow-xs'
+                      ? 'border-ketchup bg-amber-50 shadow-xs'
                       : isPassed
-                      ? 'border-mustard/60 bg-cream'
-                      : 'border-charcoal/10 bg-cream/40 opacity-50'
+                      ? 'border-green-600 bg-green-50 text-green-800'
+                      : 'border-charcoal/10 bg-cream text-charcoal-muted opacity-60'
                   }`}
                 >
-                  <div
-                    className={`w-7 h-7 mx-auto rounded-full flex items-center justify-center text-xs font-black mb-1.5 ${
-                      isPassed ? 'bg-ketchup text-cream' : 'bg-charcoal/20 text-charcoal'
-                    }`}
-                  >
-                    {idx + 1}
-                  </div>
-                  <span className="text-xs sm:text-sm font-black text-charcoal block line-clamp-1">
+                  <span className="text-xs uppercase font-bold tracking-wider block">
+                    Step 0{idx + 1}
+                  </span>
+                  <span className="text-sm sm:text-base font-black block mt-0.5">
                     {step}
                   </span>
                 </div>
@@ -224,40 +284,35 @@ export default function CartPage() {
           </div>
         </div>
 
-        {/* Fulfillment & Order Summary Grid */}
+        {/* Order Details Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Fulfillment Details */}
+          {/* Fulfillment Info */}
           <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
             <h3 className="text-lg font-black text-charcoal border-b border-charcoal/10 pb-3">
               {siteContent.confirmation.fulfillmentDetailsTitle}
             </h3>
 
-            <div className="space-y-3 text-sm">
-              <div>
-                <span className="text-xs font-bold text-charcoal-muted uppercase block">
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-charcoal-muted">
                   {siteContent.confirmation.orderTypeLabel}
                 </span>
                 <span className="font-bold text-charcoal capitalize">
-                  {placedOrder.orderType === 'delivery'
-                    ? siteContent.cart.deliveryOption
-                    : siteContent.cart.pickupOption}
+                  {placedOrder.orderType}
                 </span>
               </div>
 
-              <div>
-                <span className="text-xs font-bold text-charcoal-muted uppercase block">
+              <div className="flex justify-between">
+                <span className="text-charcoal-muted">
                   {siteContent.confirmation.branchLabel}
                 </span>
-                <span className="font-bold text-charcoal">
+                <span className="font-bold text-charcoal text-right">
                   {placedOrder.branch?.name}
                 </span>
-                <p className="text-xs text-charcoal-muted">
-                  {placedOrder.branch?.address}
-                </p>
               </div>
 
-              <div>
-                <span className="text-xs font-bold text-charcoal-muted uppercase block">
+              <div className="flex justify-between">
+                <span className="text-charcoal-muted">
                   {siteContent.confirmation.customerNameLabel}
                 </span>
                 <span className="font-bold text-charcoal">
@@ -265,8 +320,8 @@ export default function CartPage() {
                 </span>
               </div>
 
-              <div>
-                <span className="text-xs font-bold text-charcoal-muted uppercase block">
+              <div className="flex justify-between">
+                <span className="text-charcoal-muted">
                   {siteContent.confirmation.customerPhoneLabel}
                 </span>
                 <span className="font-bold text-charcoal">
@@ -274,12 +329,21 @@ export default function CartPage() {
                 </span>
               </div>
 
-              {placedOrder.orderType === 'delivery' && placedOrder.customer?.address && (
-                <div>
-                  <span className="text-xs font-bold text-charcoal-muted uppercase block">
+              <div className="flex justify-between">
+                <span className="text-charcoal-muted">
+                  {siteContent.confirmation.paymentMethodLabel}
+                </span>
+                <span className="font-bold text-charcoal">
+                  {placedOrder.paymentMethod}
+                </span>
+              </div>
+
+              {placedOrder.orderType === 'delivery' && (
+                <div className="flex flex-col pt-2 border-t border-charcoal/10">
+                  <span className="text-charcoal-muted text-xs">
                     {siteContent.confirmation.deliveryAddressLabel}
                   </span>
-                  <span className="font-bold text-charcoal">
+                  <span className="font-bold text-charcoal text-sm mt-0.5">
                     {placedOrder.customer?.address}
                   </span>
                 </div>
@@ -298,7 +362,13 @@ export default function CartPage() {
                 {placedOrder.items.map((item) => (
                   <div key={item.id} className="flex items-start justify-between text-sm gap-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl select-none">{item.menuItem?.image}</span>
+                      <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-charcoal/10">
+                        <FoodImage
+                          src={item.menuItem?.image}
+                          alt={item.menuItem?.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <div>
                         <span className="font-bold text-charcoal">
                           {item.quantity} {siteContent.common.timesSymbol} {item.menuItem?.name}
@@ -350,33 +420,40 @@ export default function CartPage() {
   // ==================== EMPTY CART STATE ====================
   if (!cart.items || cart.items.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
         <EmptyState
           emoji={siteContent.cart.emptyEmoji}
           title={siteContent.cart.emptyTitle}
           subtitle={siteContent.cart.emptySubtitle}
           actionLabel={siteContent.cart.browseMenuBtn}
-          onAction={() => window.location.assign('/menu')}
+          actionTo="/menu"
         />
       </div>
     );
   }
 
-  // ==================== CART & CHECKOUT FORM ====================
+  // ==================== ACTIVE CART & CHECKOUT ====================
+  const isOutsideArea =
+    cart.orderType === 'delivery' && (!deliveryAreaId || deliveryAreaId === 'outside');
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
-      <div className="mb-8">
-        <h1 className="text-3xl sm:text-4xl font-black text-charcoal">
-          {siteContent.cart.title}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-10">
+      <div>
+        <h1 className="text-3xl sm:text-5xl font-black text-charcoal tracking-tight">
+          {siteContent.cart.pageTitle}
         </h1>
-        <p className="text-sm sm:text-base text-charcoal-muted mt-1">
-          {siteContent.cart.subtitle}
+        <p className="text-sm sm:text-base text-charcoal-muted mt-2 font-medium">
+          {cart.items.length}{' '}
+          {cart.items.length === 1
+            ? siteContent.common.itemsBadgeSingle
+            : siteContent.common.itemsBadgePlural}{' '}
+          in your cart
         </p>
       </div>
 
       <form onSubmit={handlePlaceOrder} noValidate>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Column: Cart Items & Checkout Details */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          {/* Left Column: Line Items & Checkout Form */}
           <div className="lg:col-span-7 space-y-8">
             {/* 1. Selected Items */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
@@ -395,11 +472,18 @@ export default function CartPage() {
 
               <div className="space-y-4 divide-y divide-charcoal/10">
                 {cart.items.map((item) => (
-                  <div key={item.id} className="pt-4 first:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div
+                    key={item.id}
+                    className="pt-4 first:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                  >
                     {/* Item Details */}
                     <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center text-3xl select-none shrink-0 border border-charcoal/10">
-                        {item.menuItem?.image}
+                      <div className="w-16 h-16 rounded-2xl bg-amber-100 overflow-hidden shrink-0 border border-charcoal/10">
+                        <FoodImage
+                          src={item.menuItem?.image}
+                          alt={item.menuItem?.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
 
                       <div className="space-y-0.5">
@@ -412,15 +496,28 @@ export default function CartPage() {
                         <span className="text-xs text-charcoal-muted block">
                           {siteContent.cart.unitPricePrefix}
                           {currency}
-                          {(item.menuItem?.price + (item.selectedAddOns || []).reduce((s, a) => s + (a.price || 0), 0)).toFixed(2)}
+                          {(
+                            (item.menuItem?.price || 0) +
+                            (item.selectedAddOns || []).reduce(
+                              (s, a) => s + (a.price || 0),
+                              0
+                            )
+                          ).toFixed(2)}
                         </span>
 
                         {item.selectedAddOns?.length > 0 && (
                           <div className="text-xs text-charcoal/80 flex flex-wrap gap-1 pt-1">
-                            <span className="font-bold">{siteContent.cart.itemAddOnsPrefix}</span>
+                            <span className="font-bold">
+                              {siteContent.cart.itemAddOnsPrefix}
+                            </span>
                             {item.selectedAddOns.map((a) => (
-                              <span key={a.id} className="bg-amber-100/70 px-1.5 py-0.5 rounded text-charcoal">
-                                {a.name} ({siteContent.common.plus}{currency}{a.price})
+                              <span
+                                key={a.id}
+                                className="bg-amber-100/70 px-1.5 py-0.5 rounded text-charcoal"
+                              >
+                                {a.name} ({siteContent.common.plus}
+                                {currency}
+                                {a.price})
                               </span>
                             ))}
                           </div>
@@ -449,8 +546,18 @@ export default function CartPage() {
                         aria-label={siteContent.cart.removeBtnAria}
                         className="p-1.5 rounded-lg text-charcoal-muted hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                       >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -459,7 +566,7 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* 2. Order Type Toggle */}
+            {/* 2. Choose Order Type (Pickup vs. Delivery) */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
               <h2 className="text-xl font-black text-charcoal">
                 {siteContent.cart.orderTypeTitle}
@@ -500,7 +607,9 @@ export default function CartPage() {
                       {siteContent.cart.deliveryOption}
                     </span>
                     <span className="text-xs font-bold text-ketchup">
-                      {siteContent.common.plus}{currency}{DELIVERY_FEE}
+                      {siteContent.common.plus}
+                      {currency}
+                      {DELIVERY_FEE}
                     </span>
                   </div>
                   <p className="text-xs text-charcoal-muted">
@@ -509,6 +618,55 @@ export default function CartPage() {
                 </button>
               </div>
             </div>
+
+            {/* Delivery Service Area (When delivery is chosen) */}
+            {cart.orderType === 'delivery' && (
+              <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-black text-charcoal">
+                    {siteContent.cart.deliveryAreaTitle}
+                  </h2>
+                  <span className="text-xs font-bold text-mustard bg-amber-100 px-2.5 py-1 rounded-full border border-mustard/40">
+                    Metro Manila & Cebu
+                  </span>
+                </div>
+
+                <label className="text-xs font-bold text-charcoal-muted block">
+                  {siteContent.cart.deliveryAreaLabel}
+                </label>
+                <select
+                  value={deliveryAreaId}
+                  onChange={(e) => handleAreaChange(e.target.value)}
+                  className="w-full px-4 py-3 rounded-2xl bg-cream border-2 border-charcoal/15 font-semibold text-charcoal focus:border-ketchup focus:outline-none focus:ring-2 focus:ring-ketchup/20 text-sm cursor-pointer"
+                >
+                  <option value="">{siteContent.cart.deliveryAreaPlaceholder}</option>
+                  <optgroup label="Metro Manila Branches (BGC & Tomas Morato)">
+                    {SERVICED_DELIVERY_AREAS.filter((a) => a.region === 'Metro Manila').map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Metro Cebu Branches (Ayala & SM Seaside)">
+                    {SERVICED_DELIVERY_AREAS.filter((a) => a.region === 'Metro Cebu').map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                  <option value="outside">Other Location (Outside Coverage Zone)</option>
+                </select>
+
+                {deliveryAreaId === 'outside' && (
+                  <div className="p-3 bg-red-50 border-2 border-red-200 rounded-xl text-xs text-red-700 font-semibold leading-relaxed">
+                    {siteContent.cart.unsupportedAreaWarning}
+                  </div>
+                )}
+                {errors.area && (
+                  <p className="text-xs font-bold text-red-600">{errors.area}</p>
+                )}
+              </div>
+            )}
 
             {/* 3. Branch Selector */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-3">
@@ -533,14 +691,145 @@ export default function CartPage() {
               )}
             </div>
 
-            {/* 4. Customer Contact Details */}
+            {/* 4. Customer Account & Contact Details */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
-              <h2 className="text-xl font-black text-charcoal">
-                {siteContent.cart.customerTitle}
-              </h2>
+              <div className="flex items-center justify-between border-b border-charcoal/10 pb-3">
+                <h2 className="text-xl font-black text-charcoal">
+                  {siteContent.cart.customerTitle}
+                </h2>
+                {isAuthenticated && (
+                  <button
+                    type="button"
+                    onClick={logout}
+                    className="text-xs font-bold text-red-600 hover:underline cursor-pointer"
+                  >
+                    {siteContent.auth.switchAccount}
+                  </button>
+                )}
+              </div>
 
-              <div className="space-y-4">
-                {/* Full Name */}
+              {/* If user is not authenticated: Show simple inline Sign In / Sign Up */}
+              {!isAuthenticated ? (
+                <div className="p-5 bg-amber-50/70 border-2 border-mustard/40 rounded-2xl space-y-4">
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-ketchup" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span className="text-sm font-black text-charcoal">
+                      {siteContent.auth.accountRequiredNotice}
+                    </span>
+                  </div>
+
+                  {/* Tabs */}
+                  <div className="flex gap-2 border-b border-charcoal/10 pb-2">
+                    <button
+                      type="button"
+                      onClick={() => setAuthTab('login')}
+                      className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                        authTab === 'login'
+                          ? 'bg-charcoal text-cream'
+                          : 'bg-cream text-charcoal-muted hover:text-charcoal'
+                      }`}
+                    >
+                      {siteContent.auth.tabLogin}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAuthTab('signup')}
+                      className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
+                        authTab === 'signup'
+                          ? 'bg-charcoal text-cream'
+                          : 'bg-cream text-charcoal-muted hover:text-charcoal'
+                      }`}
+                    >
+                      {siteContent.auth.tabSignup}
+                    </button>
+                  </div>
+
+                  {authError && (
+                    <p className="text-xs font-bold text-red-600">{authError}</p>
+                  )}
+
+                  <div className="space-y-3">
+                    {authTab === 'signup' && (
+                      <div>
+                        <label className="text-xs font-bold text-charcoal-muted block mb-1">
+                          {siteContent.auth.nameLabel}
+                        </label>
+                        <input
+                          type="text"
+                          value={authName}
+                          onChange={(e) => setAuthName(e.target.value)}
+                          placeholder={siteContent.auth.namePlaceholder}
+                          className="w-full px-4 py-2.5 rounded-xl bg-cream border-2 border-charcoal/15 text-sm"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="text-xs font-bold text-charcoal-muted block mb-1">
+                        {siteContent.auth.identifierLabel}
+                      </label>
+                      <input
+                        type="text"
+                        value={authIdentifier}
+                        onChange={(e) => setAuthIdentifier(e.target.value)}
+                        placeholder={siteContent.auth.identifierPlaceholder}
+                        className="w-full px-4 py-2.5 rounded-xl bg-cream border-2 border-charcoal/15 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-charcoal-muted block mb-1">
+                        {siteContent.auth.passwordLabel}
+                      </label>
+                      <input
+                        type="password"
+                        value={authPassword}
+                        onChange={(e) => setAuthPassword(e.target.value)}
+                        placeholder={siteContent.auth.passwordPlaceholder}
+                        className="w-full px-4 py-2.5 rounded-xl bg-cream border-2 border-charcoal/15 text-sm"
+                      />
+                    </div>
+
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleAuthSubmit}
+                      className="w-full"
+                    >
+                      {authTab === 'login'
+                        ? siteContent.auth.loginSubmit
+                        : siteContent.auth.signupSubmit}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-green-50 border-2 border-green-200 rounded-2xl flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-green-700 text-cream font-black flex items-center justify-center text-xs">
+                      {user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-green-900 block">
+                        {siteContent.auth.signedInAs} <strong>{user.name}</strong>
+                      </span>
+                      <span className="text-[11px] text-green-800">
+                        {user.email || user.phone}
+                      </span>
+                    </div>
+                  </div>
+                  <Badge variant="neutral">Verified Account</Badge>
+                </div>
+              )}
+
+              {errors.auth && (
+                <p className="text-xs font-bold text-red-600">{errors.auth}</p>
+              )}
+
+              {/* Contact Information Fields */}
+              <div className="space-y-4 pt-2">
                 <div>
                   <label className="text-xs font-bold text-charcoal-muted block mb-1">
                     {siteContent.cart.nameLabel}
@@ -557,7 +846,6 @@ export default function CartPage() {
                   )}
                 </div>
 
-                {/* Mobile Phone */}
                 <div>
                   <label className="text-xs font-bold text-charcoal-muted block mb-1">
                     {siteContent.cart.phoneLabel}
@@ -574,7 +862,6 @@ export default function CartPage() {
                   )}
                 </div>
 
-                {/* Delivery Address (only when delivery) */}
                 {cart.orderType === 'delivery' && (
                   <div>
                     <label className="text-xs font-bold text-charcoal-muted block mb-1">
@@ -592,6 +879,47 @@ export default function CartPage() {
                     )}
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* 5. Payment Method */}
+            <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
+              <h2 className="text-xl font-black text-charcoal">
+                {siteContent.cart.paymentTitle}
+              </h2>
+
+              <div className="space-y-2.5">
+                {[
+                  { id: 'cod', label: siteContent.cart.paymentCod, desc: 'Pay in cash upon arrival' },
+                  { id: 'gcash', label: siteContent.cart.paymentGcash, desc: 'Scan driver QR or pay in store' },
+                  { id: 'card', label: siteContent.cart.paymentCard, desc: 'Wireless terminal on delivery' },
+                ].map((pm) => (
+                  <label
+                    key={pm.id}
+                    className={`flex items-start gap-3 p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
+                      paymentMethod === pm.label
+                        ? 'border-ketchup bg-amber-50 shadow-xs'
+                        : 'border-charcoal/10 bg-cream hover:border-charcoal/30'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={pm.label}
+                      checked={paymentMethod === pm.label}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="mt-1 accent-ketchup"
+                    />
+                    <div>
+                      <span className="text-sm font-black text-charcoal block">
+                        {pm.label}
+                      </span>
+                      <span className="text-xs text-charcoal-muted">
+                        {pm.desc}
+                      </span>
+                    </div>
+                  </label>
+                ))}
               </div>
             </div>
           </div>
@@ -623,15 +951,13 @@ export default function CartPage() {
                       {siteContent.cart.promoApplyBtn}
                     </Button>
                   </div>
-
-                  <p className="text-xs text-charcoal-muted">
+                  <p className="text-[11px] text-charcoal-muted">
                     {siteContent.cart.promoAvailableHint}
                   </p>
-
                   {promoMessage.text && (
                     <p
                       className={`text-xs font-bold ${
-                        promoMessage.type === 'success' ? 'text-green-700' : 'text-red-600'
+                        promoMessage.type === 'error' ? 'text-red-600' : 'text-green-700'
                       }`}
                     >
                       {promoMessage.text}
@@ -639,12 +965,12 @@ export default function CartPage() {
                   )}
                 </div>
               ) : (
-                <div className="p-3 bg-amber-100 rounded-xl flex items-center justify-between border border-mustard">
+                <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
                   <div>
-                    <span className="font-black text-ketchup text-sm block">
+                    <span className="font-mono font-black text-green-900 text-sm block">
                       {cart.promo.code}
                     </span>
-                    <span className="text-xs text-charcoal font-semibold">
+                    <span className="text-xs text-green-800">
                       {cart.promo.type === 'freeDelivery'
                         ? siteContent.cart.promoFreeDeliveryMsg
                         : siteContent.cart.promoSuccessMsg}
@@ -684,7 +1010,8 @@ export default function CartPage() {
                   <div className="flex items-center justify-between text-green-700">
                     <span className="font-medium">{siteContent.cart.discountLabel}</span>
                     <span className="font-bold">
-                      {siteContent.common.minus}{currency}
+                      {siteContent.common.minus}
+                      {currency}
                       {cart.getDiscount().toFixed(2)}
                     </span>
                   </div>
@@ -722,12 +1049,19 @@ export default function CartPage() {
                 </p>
               )}
 
+              {isOutsideArea && (
+                <p className="text-xs font-bold text-amber-700 text-center bg-amber-50 p-2 rounded-lg border border-amber-200">
+                  ⚠️ Delivery is not supported outside serviced zones.
+                </p>
+              )}
+
               {/* Place Order CTA Button */}
               <Button
                 type="submit"
                 variant="primary"
                 size="lg"
-                className="w-full text-lg shadow-md"
+                disabled={isOutsideArea}
+                className="w-full text-lg shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {siteContent.cart.placeOrderBtn}
               </Button>
@@ -738,4 +1072,3 @@ export default function CartPage() {
     </div>
   );
 }
-

@@ -1,119 +1,104 @@
-# Bun & Bird 🍔🍗
+# Bun & Bird - Fast Food Ordering Web Application
 
-**Bun & Bird** is a modern, responsive, front-end only fast food ordering web application designed for a premium burger and fried chicken dining experience. Built for a Midterm Practical Exam, the application strictly adheres to clean OOP principles, reactive immutable state management, and semantic Tailwind CSS styling.
-
----
-
-## 🌟 Features
-
-- **Multi-Page Routing (React Router v7):**
-  - **Home (`/`):** Dynamic hero with call-to-action buttons, best-seller featured items, combo deals and bundles section, and "Why Foodies Crave Bun & Bird" feature strip.
-  - **Menu (`/menu`):** Interactive category filter tabs (Burgers, Chicken, Combos, Sides, Drinks, Desserts, and All Items), real-time search with case-insensitive `MenuItem.matches()`, tag filter chips (Best Seller, Spicy, New, Veggie), sorting (Featured, Price Low-to-High, Price High-to-Low, Alphabetical), live results count, and empty-state handling.
-  - **Item Details (`/menu/:id`):** Large emoji hero tile, item details, dynamic add-on checkboxes that calculate prices in real time, quantity selector, add-to-cart action with instant feedback, combo package savings breakdown for `Combo` instances, and custom not-found state for bad IDs.
-  - **Cart & Checkout (`/cart`):** Full cart line items with add-ons summary, quantity adjustments, item removal, promo code engine with validation feedback (`BUNBIRD10`, `SAVE50`, `FREESHIP`), store pickup vs. doorstep delivery toggle (updating delivery fees dynamically), branch fulfillment selector, customer contact & delivery address validation, and instant order placement with a live 3-step order tracker (`Preparing` → `Ready` → `Completed`) simulation.
-  - **Branches (`/branches`):** Responsive grid of fictional Bun & Bird Metro Manila locations showing operating hours, phone numbers, complete addresses, and order shortcuts.
-  - **404 Not Found (`*`):** Fast-food themed fallback page with direct navigation back to home and menu.
-
-- **Strict Separation of Concerns & Architecture:**
-  - **No Hardcoded UI Text:** Every visible string (headings, paragraphs, buttons, placeholders, form labels, errors, aria attributes, currency symbols) is stored in `src/data/siteContent.js`.
-  - **Real ES6 Object-Oriented Models:** Implements `Category`, `MenuItem`, `Combo` (extends `MenuItem`), `AddOn`, `CartItem`, `Cart`, `Promo`, `Branch`, and `Order` in `src/models/`.
-  - **State Management:** React Context (`CartContext`) utilizing immutable Cart operations.
-  - **Pure Tailwind CSS v4:** Styled using utility classes and `@theme` palette (`#d62828` ketchup, `#f7b32b` mustard, `#fff4e0` cream, `#1f1b16` charcoal) defined in `src/index.css`. No external UI libraries or icon packages.
-  - **Responsive & Accessible:** Mobile-first layout tested across 375px, 768px, and 1280px viewport widths with visible focus rings and zero horizontal overflow.
+A front-end fast food ordering web application developed for a Midterm Practical Exam. The application simulates a real-world digital ordering platform for **Bun & Bird**, a burger and fried chicken concept with locations across Metro Manila and Metro Cebu.
 
 ---
 
-## 📁 Folder Structure
+## Tech Stack
+
+- **Framework:** React 19 + Vite
+- **Routing:** React Router v7
+- **Styling:** Tailwind CSS v4 (single unified stylesheet in `src/index.css`)
+- **State & Storage:** React Context API + LocalStorage persistence
+
+---
+
+## Architecture & Code Organization
+
+The project follows a clean separation between data models, business services, and UI components:
 
 ```
-bun-and-bird/
-├── index.html
-├── package.json
-├── vite.config.js
-├── README.md
-└── src/
-    ├── main.jsx
-    ├── App.jsx
-    ├── index.css
-    ├── context/
-    │   └── CartContext.jsx
-    ├── models/
-    │   ├── index.js
-    │   ├── Category.js
-    │   ├── MenuItem.js
-    │   ├── Combo.js
-    │   ├── AddOn.js
-    │   ├── CartItem.js
-    │   ├── Cart.js
-    │   ├── Promo.js
-    │   ├── Branch.js
-    │   └── Order.js
-    ├── data/
-    │   ├── index.js
-    │   ├── categories.js
-    │   ├── addOns.js
-    │   ├── menuItems.js
-    │   ├── combos.js
-    │   ├── promos.js
-    │   ├── branches.js
-    │   └── siteContent.js
-    ├── components/
-    │   ├── Layout.jsx
-    │   ├── Header.jsx
-    │   ├── Footer.jsx
-    │   ├── Button.jsx
-    │   ├── Badge.jsx
-    │   ├── MenuCard.jsx
-    │   ├── CategoryTabs.jsx
-    │   ├── SearchBar.jsx
-    │   ├── QuantitySelector.jsx
-    │   ├── SectionHeading.jsx
-    │   └── EmptyState.jsx
-    └── pages/
-        ├── Home.jsx
-        ├── Menu.jsx
-        ├── ItemDetails.jsx
-        ├── CartPage.jsx
-        ├── Branches.jsx
-        └── NotFound.jsx
+src/
+├── models/         # Pure data models (MenuItem, Combo, CartItem, Cart, Order, Branch, User)
+├── services/       # Business logic layer (cartService, orderService, authService, menuService)
+├── context/        # Global state providers (CartContext with auto-save, AuthContext)
+├── data/           # Application data sources, menu items, branches, and UI copy
+├── components/     # Reusable UI components (FoodImage, Header, Footer, MenuCard, etc.)
+└── pages/          # Application views (Home, Menu, ItemDetails, CartPage, Branches, NotFound)
 ```
+
+### Models vs. Services
+- **Models (`src/models/`):** Pure entity classes containing constructors, properties, and basic computed getters.
+- **Services (`src/services/`):** Centralized business operations including cart calculations, promo code validation, localStorage read/write persistence, delivery service area coverage checks, and order generation.
 
 ---
 
-## 🚀 Installation & Running
+## Core Features
+
+1. **Menu Catalog (10 Core Items):**
+   - 8 individual items (Burgers, Fried Chicken, Wings, Loaded Fries) and 2 value combos.
+   - Designed for image assets in `public/images/` with fallback placeholders to prevent broken image states.
+   - Category filtering, real-time search, and tag filters (Best Seller, Spicy, New, Veggie).
+
+2. **Item Customization:**
+   - Real-time price updates for add-ons (extra cheese, bacon, dips, sides).
+   - Dynamic quantity adjustments.
+
+3. **Persistent Shopping Cart:**
+   - Active cart items, quantities, add-ons, and promo discounts are preserved across browser refreshes via `localStorage`.
+
+4. **User Account & Checkout Flow:**
+   - User authentication (Sign In / Quick Sign Up) required before placing an order.
+   - Pre-fills customer contact information upon login.
+   - Choice between **Store Pickup** (free) and **Doorstep Delivery** (₱49 fee).
+
+5. **Delivery Area Validation:**
+   - Enforces logical delivery coverage around serviced branch hubs (Taguig/BGC, Quezon City, Ayala Center Cebu, and SM Seaside SRP).
+   - Warns users if their selected delivery destination falls outside the serviceable radius.
+
+6. **Order Placement & Status Tracker:**
+   - Multiple payment options: Cash on Delivery, GCash/Maya, or Card Terminal on arrival.
+   - Interactive live status tracker simulating kitchen progression: `Preparing` → `Ready` → `Completed`.
+
+7. **Branches Showcase:**
+   - Horizontal scrolling carousel displaying location details, operating hours, and contact numbers.
+
+---
+
+## Getting Started
 
 ### Prerequisites
-- Node.js (v18 or higher recommended; developed and tested on Node v26)
-- npm (v9+)
+- Node.js (v18 or higher)
+- npm
 
-### Steps
+### Installation & Run
 
-1. **Install dependencies:**
+1. Clone or extract the project directory:
+   ```bash
+   cd bun-and-bird
+   ```
+
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-2. **Start development server:**
+3. Start the local development server:
    ```bash
    npm run dev
    ```
-   Open your browser at the displayed local URL (usually `http://localhost:5173/`).
+   Open your browser at `http://localhost:5173/`.
 
-3. **Build for production:**
+4. Build for production:
    ```bash
    npm run build
    ```
 
-4. **Preview production build:**
-   ```bash
-   npm run preview
-   ```
-
 ---
 
-## 🏷️ Test Promo Codes
-During checkout on the `/cart` page, test any of the following voucher codes:
-- `BUNBIRD10` — 10% discount on food subtotal
-- `SAVE50` — ₱50 fixed discount
-- `FREESHIP` — Free delivery on doorstep orders
+## Test Promo Codes
 
+The checkout page supports the following test vouchers:
+- `BUNBIRD10` — 10% discount on food subtotal
+- `SAVE50` — ₱50 off order total
+- `FREESHIP` — Free delivery on doorstep orders

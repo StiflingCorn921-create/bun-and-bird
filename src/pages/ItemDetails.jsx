@@ -8,6 +8,7 @@ import { Combo } from '../models/Combo';
 import { Badge } from '../components/Badge';
 import { Button } from '../components/Button';
 import { QuantitySelector } from '../components/QuantitySelector';
+import { FoodImage } from '../components/FoodImage';
 
 export default function ItemDetails() {
   const { id } = useParams();
@@ -89,12 +90,15 @@ export default function ItemDetails() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-        {/* Left Column: Large Emoji Tile */}
+        {/* Left Column: Food Image Tile */}
         <div className="lg:col-span-5 flex flex-col items-center">
-          <div className="w-full aspect-square rounded-3xl bg-amber-100/70 border-4 border-mustard/40 flex items-center justify-center p-8 shadow-md">
-            <span className="text-8xl sm:text-9xl select-none transition-transform hover:scale-105 duration-300">
-              {item.image}
-            </span>
+          <div className="w-full aspect-square rounded-3xl bg-amber-100/70 border-4 border-mustard/40 overflow-hidden shadow-md flex items-center justify-center">
+            <FoodImage
+              src={item.image}
+              alt={item.name}
+              className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+              containerClassName="w-full h-full"
+            />
           </div>
 
           {/* Tags */}

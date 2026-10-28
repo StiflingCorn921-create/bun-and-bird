@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from './Badge';
 import { Button } from './Button';
+import { FoodImage } from './FoodImage';
 import { siteContent } from '../data/siteContent';
 import { useCart } from '../context/CartContext';
 import { CartItem } from '../models/CartItem';
@@ -37,11 +38,14 @@ export function MenuCard({ item }) {
       <div>
         <Link
           to={`/menu/${item.id}`}
-          className="block relative aspect-4/3 w-full rounded-xl bg-amber-100/60 flex items-center justify-center overflow-hidden mb-4 group-hover:scale-[1.02] transition-transform"
+          className="block relative aspect-4/3 w-full rounded-xl bg-amber-100/60 overflow-hidden mb-4 group-hover:scale-[1.02] transition-transform"
         >
-          <span className="text-6xl sm:text-7xl select-none transition-transform group-hover:rotate-3 duration-200">
-            {item.image}
-          </span>
+          <FoodImage
+            src={item.image}
+            alt={item.name}
+            className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+            containerClassName="w-full h-full"
+          />
 
           {isCombo && (
             <div className="absolute top-2.5 right-2.5">

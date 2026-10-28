@@ -19,15 +19,12 @@ export class Combo extends MenuItem {
   }
 
   getTotalValue() {
-    return this.includedItems.reduce((total, item) => total + (Number(item?.price) || 0), 0);
+    return (this.includedItems || []).reduce((total, item) => total + (Number(item?.price) || 0), 0);
   }
 
   getSavings() {
-    if (this.discount > 0) {
-      return this.discount;
-    }
+    if (this.discount > 0) return this.discount;
     const savings = this.getTotalValue() - this.price;
     return savings > 0 ? savings : 0;
   }
 }
-

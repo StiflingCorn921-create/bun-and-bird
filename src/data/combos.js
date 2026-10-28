@@ -9,15 +9,15 @@ export const combos = [
     description: 'Two mains, two sides, two drinks',
     price: 360,
     categoryId: 'combos',
-    image: '🍔',
+    image: '/images/burger-combo.jpg',
     tags: ['best seller'],
     addOns: comboAddOns,
     includedItems: [
       menuItemsMap.get('burger-classic'),
-      menuItemsMap.get('side-fries'),
-      menuItemsMap.get('drink-iced-tea'),
-    ],
-    discount: 44,
+      menuItemsMap.get('side-potato-wedges'),
+      menuItemsMap.get('burger-double-stack'),
+    ].filter(Boolean),
+    discount: 50,
   }),
   new Combo({
     id: 'combo-chicken',
@@ -25,70 +25,20 @@ export const combos = [
     description: 'Eight pieces, four sides, four drinks',
     price: 360,
     categoryId: 'combos',
-    image: '🍗',
+    image: '/images/chicken-combo.jpg',
     tags: ['best seller'],
     addOns: comboAddOns,
     includedItems: [
       menuItemsMap.get('chicken-2pc'),
-      menuItemsMap.get('side-mashed-potato'),
-      menuItemsMap.get('drink-cola-float'),
-    ],
+      menuItemsMap.get('chicken-spicy-wings'),
+      menuItemsMap.get('side-potato-wedges'),
+    ].filter(Boolean),
     discount: 50,
-  }),
-  new Combo({
-    id: 'combo-family',
-    name: 'Family Bucket',
-    description: 'Any burger, fries, and a drink',
-    price: 360,
-    categoryId: 'combos',
-    image: '🎉',
-    tags: ['best seller'],
-    addOns: comboAddOns,
-    includedItems: [
-      menuItemsMap.get('chicken-2pc'),
-      menuItemsMap.get('chicken-spicy-wings'),
-      menuItemsMap.get('burger-double-stack'),
-      menuItemsMap.get('chicken-sandwich'),
-      menuItemsMap.get('side-fries'),
-      menuItemsMap.get('side-mashed-potato'),
-    ],
-    discount: 151,
-  }),
-  new Combo({
-    id: 'combo-duo',
-    name: 'Bird & Bun Duo Feast',
-    description: 'The best of both worlds: Double Stack, Six-Piece Wings, seasoned fries, and house lemonade.',
-    price: 469,
-    categoryId: 'combos',
-    image: '🍱',
-    tags: ['best seller', 'new'],
-    addOns: comboAddOns,
-    includedItems: [
-      menuItemsMap.get('burger-double-stack'),
-      menuItemsMap.get('chicken-spicy-wings'),
-      menuItemsMap.get('side-fries'),
-      menuItemsMap.get('drink-lemonade'),
-    ],
-    discount: 88,
-  }),
-  new Combo({
-    id: 'combo-snack',
-    name: 'Crunch & Sweet Box',
-    description: 'Crispy chicken tenders with dip, beer-battered onion rings, and a warm cinnamon apple pie.',
-    price: 279,
-    categoryId: 'combos',
-    image: '🎁',
-    tags: ['new'],
-    addOns: comboAddOns,
-    includedItems: [
-      menuItemsMap.get('chicken-tenders'),
-      menuItemsMap.get('side-onion-rings'),
-      menuItemsMap.get('dessert-apple-pie'),
-    ],
-    discount: 54,
   }),
 ];
 
-// All menu items combined (individual items first so the top 8 match Figma, followed by combos)
+export const combosMap = new Map(combos.map((c) => [c.id, c]));
+
+// All 10 menu items combined (8 individual items + 2 combos)
 export const allMenuItems = [...menuItemsMap.values(), ...combos];
-export const allMenuItemsMap = new Map(allMenuItems.map(item => [item.id, item]));
+export const allMenuItemsMap = new Map(allMenuItems.map((item) => [item.id, item]));

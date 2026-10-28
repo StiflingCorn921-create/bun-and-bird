@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { siteContent } from '../data/siteContent';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 
 export function Header({ itemCount: propItemCount }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { itemCount: contextItemCount } = useCart();
+  const { user, isAuthenticated } = useAuth();
   const itemCount = propItemCount !== undefined ? propItemCount : contextItemCount;
 
   const toggleMobileMenu = () => {
@@ -35,7 +37,7 @@ export function Header({ itemCount: propItemCount }) {
             className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-ketchup rounded-lg p-1"
           >
             <img
-              src="/public/images/Bun&Bird logo.jpg "
+              src="/images/Bun&Bird logo.jpg"
               alt={siteContent.brand.logoAlt}
               className="w-11 h-11 object-contain transition-transform group-hover:scale-110"
             />
@@ -62,8 +64,27 @@ export function Header({ itemCount: propItemCount }) {
             </NavLink>
           </nav>
 
-          {/* Desktop Right CTA: Cart & Order button */}
+          {/* Desktop Right CTA: Cart & Account */}
           <div className="hidden md:flex items-center gap-3">
+            {isAuthenticated ? (
+              <Link
+                to="/cart"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-charcoal/5 border border-charcoal/10 text-xs font-bold text-charcoal hover:bg-charcoal/10 transition-colors"
+              >
+                <div className="w-6 h-6 rounded-full bg-mustard text-charcoal font-black flex items-center justify-center text-[10px]">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="max-w-[100px] truncate">{user.name}</span>
+              </Link>
+            ) : (
+              <Link
+                to="/cart"
+                className="text-xs font-bold text-charcoal-muted hover:text-ketchup px-2 py-1 transition-colors"
+              >
+                {siteContent.nav.login}
+              </Link>
+            )}
+
             <NavLink
               to="/cart"
               aria-label={siteContent.nav.viewCartAria}

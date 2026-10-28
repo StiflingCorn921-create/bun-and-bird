@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { siteContent } from '../data/siteContent';
 import { categories, allMenuItems } from '../data';
+import { menuService } from '../services/menuService';
 import { MenuCard } from '../components/MenuCard';
 import { CategoryTabs } from '../components/CategoryTabs';
 import { SearchBar } from '../components/SearchBar';
@@ -15,38 +16,21 @@ export default function Menu() {
   const [selectedTag, setSelectedTag] = useState('all');
   const [sortOption, setSortOption] = useState('default');
 
-  // Filter and sort items
+  // Filter and sort items via menuService
   const filteredItems = useMemo(() => {
-    return allMenuItems.filter((item) => {
-      // 1. Category Filter
-      if (selectedCategory !== 'all' && item.categoryId !== selectedCategory) {
-        return false;
-      }
-
-      // 2. Search Query (uses MenuItem.matches method!)
-      if (searchQuery.trim() && !item.matches(searchQuery)) {
-        return false;
-      }
-
-      // 3. Tag Filter
-      if (selectedTag !== 'all') {
-        if (!Array.isArray(item.tags) || !item.tags.includes(selectedTag)) {
-          return false;
-        }
-      }
-
-      return true;
-    }).sort((a, b) => {
-      if (sortOption === 'priceAsc') {
-        return a.price - b.price;
-      }
-      if (sortOption === 'priceDesc') {
-        return b.price - a.price;
-      }
-      if (sortOption === 'nameAsc') {
-        return a.name.localeCompare(b.name);
-      }
-      return 0; // default featured order
+    return menuService.searchAndFilter({
+      items: allMenuItems,
+      query: searchQuery,
+      categoryId: selectedCategory,
+      activeTag: selectedTag === 'all' ? null : selectedTag,
+      sortBy:
+        sortOption === 'priceAsc'
+          ? 'price-asc'
+          : sortOption === 'priceDesc'
+          ? 'price-desc'
+          : sortOption === 'nameAsc'
+          ? 'alpha-asc'
+          : 'featured',
     });
   }, [selectedCategory, searchQuery, selectedTag, sortOption]);
 

@@ -7,6 +7,9 @@ export class Order {
     branch = null,
     total = 0,
     status = 'Preparing',
+    paymentMethod = 'Cash on Delivery',
+    deliveryArea = null,
+    createdAt = new Date().toISOString(),
   }) {
     this.id = id;
     this.items = items;
@@ -15,14 +18,8 @@ export class Order {
     this.branch = branch;
     this.total = Number(total);
     this.status = status;
-  }
-
-  advanceStatus() {
-    if (this.status === 'Preparing') {
-      this.status = 'Ready';
-    } else if (this.status === 'Ready') {
-      this.status = 'Completed';
-    }
+    this.paymentMethod = paymentMethod;
+    this.deliveryArea = deliveryArea;
+    this.createdAt = createdAt;
   }
 }
-

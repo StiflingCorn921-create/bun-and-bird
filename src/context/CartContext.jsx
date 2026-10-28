@@ -1,42 +1,43 @@
 import { createContext, useContext, useState, useMemo } from 'react';
-import { Cart } from '../models/Cart';
+import { cartService } from '../services/cartService';
 
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState(() => new Cart([], null, 'pickup'));
+  // Load saved cart state from localStorage on init
+  const [cart, setCart] = useState(() => cartService.loadCart());
 
   const addItem = (cartItem) => {
-    setCart(prev => prev.addItem(cartItem));
+    setCart((prev) => cartService.addItem(prev, cartItem));
   };
 
   const removeItem = (id) => {
-    setCart(prev => prev.removeItem(id));
+    setCart((prev) => cartService.removeItem(prev, id));
   };
 
   const updateQuantity = (id, quantity) => {
-    setCart(prev => prev.updateQuantity(id, quantity));
+    setCart((prev) => cartService.updateQuantity(prev, id, quantity));
   };
 
   const applyPromo = (code) => {
-    const freshCart = cart.clone();
-    const success = freshCart.applyPromo(code);
-    if (success) {
-      setCart(freshCart);
+    const result = cartService.applyPromo(cart, code);
+    if (result.success) {
+      setCart(result.cart);
+      return true;
     }
-    return success;
+    return false;
   };
 
   const removePromo = () => {
-    setCart(prev => prev.removePromo());
+    setCart((prev) => cartService.removePromo(prev));
   };
 
   const setOrderType = (orderType) => {
-    setCart(prev => prev.setOrderType(orderType));
+    setCart((prev) => cartService.setOrderType(prev, orderType));
   };
 
   const clearCart = () => {
-    setCart(prev => prev.clear());
+    setCart((prev) => cartService.clearCart(prev));
   };
 
   const itemCount = useMemo(() => {
@@ -68,4 +69,3 @@ export function useCart() {
   }
   return context;
 }
-
