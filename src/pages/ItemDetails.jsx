@@ -151,10 +151,10 @@ export default function ItemDetails() {
                   <ul className="space-y-1.5 text-xs sm:text-sm text-charcoal">
                     {item.includedItems.map((inc) => (
                       <li key={inc.id} className="flex items-center gap-2">
-                        <span className="text-base select-none">{inc.image}</span>
                         <span className="font-medium">{inc.name}</span>
                         <span className="text-charcoal-muted ml-auto font-bold">
-                          {inc.getFormattedPrice()}
+                          {currency}
+                          {inc.price.toFixed(2)}
                         </span>
                       </li>
                     ))}

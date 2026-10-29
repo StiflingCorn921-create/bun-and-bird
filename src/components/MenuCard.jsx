@@ -100,7 +100,8 @@ export function MenuCard({ item }) {
             {siteContent.itemDetails.priceLabel}
           </span>
           <span className="text-xl sm:text-2xl font-black text-ketchup">
-            {item.getFormattedPrice()}
+            {currency}
+            {item.price.toFixed(2)}
           </span>
         </div>
 
