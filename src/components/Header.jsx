@@ -31,7 +31,6 @@ export function Header({ itemCount: propItemCount }) {
     <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur-md border-b border-charcoal/10 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Brand Logo & Name */}
           <Link
             to="/"
             onClick={closeMobileMenu}
@@ -53,7 +52,6 @@ export function Header({ itemCount: propItemCount }) {
             </div>
           </Link>
 
-          {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-2">
             <NavLink to="/" end className={getNavLinkClass}>
               {siteContent.nav.home}
@@ -66,7 +64,6 @@ export function Header({ itemCount: propItemCount }) {
             </NavLink>
           </nav>
 
-          {/* Desktop Right CTA: Cart & Account */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated && user ? (
               <div className="relative">
@@ -154,7 +151,6 @@ export function Header({ itemCount: propItemCount }) {
             </NavLink>
           </div>
 
-          {/* Mobile Right Controls: Cart Icon & Hamburger Button */}
           <div className="flex md:hidden items-center gap-2">
             <NavLink
               to="/cart"
@@ -208,7 +204,6 @@ export function Header({ itemCount: propItemCount }) {
         </div>
       </div>
 
-      {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-charcoal/10 bg-cream px-4 pt-3 pb-6 space-y-2 shadow-lg animate-in slide-in-from-top duration-200">
           <NavLink
@@ -262,7 +257,6 @@ export function Header({ itemCount: propItemCount }) {
             )}
           </NavLink>
 
-          {/* Mobile Auth button */}
           <div className="pt-2 border-t border-charcoal/10">
             {isAuthenticated && user ? (
               <div className="flex items-center justify-between p-3 bg-charcoal/5 rounded-xl">

@@ -6,7 +6,6 @@ export function Footer() {
     <footer className="bg-charcoal text-cream mt-auto border-t-4 border-mustard">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12">
-          {/* Brand Info */}
           <div className="md:col-span-2 space-y-4">
             <Link
               to="/"
@@ -28,7 +27,6 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
           <div className="space-y-4">
             <h3 className="text-base font-black text-mustard uppercase tracking-wider">
               {siteContent.footer.navigationTitle}
@@ -69,7 +67,6 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact & Hours */}
           <div className="space-y-4">
             <h3 className="text-base font-black text-mustard uppercase tracking-wider">
               {siteContent.footer.contactTitle}
@@ -81,7 +78,6 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-cream/10 flex flex-col sm:flex-row items-center justify-between text-xs text-cream/60 gap-4 text-center sm:text-left">
           <p>{siteContent.footer.copyright}</p>
           <p>{siteContent.brand.tagline}</p>

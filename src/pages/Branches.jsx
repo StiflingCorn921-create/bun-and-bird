@@ -12,14 +12,12 @@ export default function Branches() {
         subtitle={siteContent.branches.subtitle}
       />
 
-      {/* Horizontal Scrolling Carousel */}
       <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 scroll-smooth">
         {branches.map((branch, index) => (
           <div
             key={branch.id}
             className="w-[300px] sm:w-[360px] shrink-0 snap-start bg-cream-light border-2 border-charcoal/20 rounded-2xl p-6 flex flex-col justify-between hover:border-ketchup/40 hover:shadow-xl transition-all"
           >
-            {/* Branch Details */}
             <div className="space-y-4">
               <div className="space-y-1">
                 <span className="text-xs font-black uppercase tracking-widest text-mustard block">
@@ -31,7 +29,6 @@ export default function Branches() {
                 </h3>
               </div>
 
-              {/* Address */}
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-charcoal block">
                   {siteContent.branches.addressLabel}
@@ -41,7 +38,6 @@ export default function Branches() {
                 </p>
               </div>
 
-              {/* Hours */}
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-charcoal block">
                   {siteContent.branches.hoursLabel}
@@ -51,7 +47,6 @@ export default function Branches() {
                 </p>
               </div>
 
-              {/* Phone */}
               <div className="space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-charcoal block">
                   {siteContent.branches.phoneLabel}
@@ -74,7 +69,6 @@ export default function Branches() {
         ))}
       </div>
 
-      {/* Carousel Hint */}
       <p className="text-xs font-semibold text-charcoal-muted text-center">
         {siteContent.branches.carouselHint}
       </p>

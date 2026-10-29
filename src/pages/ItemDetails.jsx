@@ -20,7 +20,6 @@ export default function ItemDetails() {
   const [selectedAddOns, setSelectedAddOns] = useState([]);
   const [notification, setNotification] = useState(false);
 
-  // If item not found, render Not Found state
   if (!item) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-6">
@@ -48,7 +47,6 @@ export default function ItemDetails() {
   const isCombo = item instanceof Combo;
   const currency = siteContent.common.currencySymbol;
 
-  // Calculate live dynamic prices
   const addOnsTotal = selectedAddOns.reduce((sum, a) => sum + (Number(a.price) || 0), 0);
   const unitPrice = item.price + addOnsTotal;
   const totalPrice = unitPrice * quantity;
@@ -79,7 +77,6 @@ export default function ItemDetails() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-      {/* Back Button */}
       <div className="mb-6">
         <Link
           to="/menu"
@@ -90,7 +87,6 @@ export default function ItemDetails() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
-        {/* Left Column: Food Image Tile */}
         <div className="lg:col-span-5 flex flex-col items-center">
           <div className="w-full aspect-square rounded-3xl bg-amber-100/70 border-4 border-mustard/40 overflow-hidden shadow-md flex items-center justify-center">
             <FoodImage
@@ -101,7 +97,6 @@ export default function ItemDetails() {
             />
           </div>
 
-          {/* Tags */}
           {Array.isArray(item.tags) && item.tags.length > 0 && (
             <div className="flex flex-wrap justify-center gap-2 mt-4">
               {item.tags.map((tag) => (
@@ -116,7 +111,6 @@ export default function ItemDetails() {
           )}
         </div>
 
-        {/* Right Column: Item Information & Customization */}
         <div className="lg:col-span-7 space-y-6">
           <div>
             <h1 className="text-3xl sm:text-4xl font-black text-charcoal tracking-tight">
@@ -127,7 +121,6 @@ export default function ItemDetails() {
             </p>
           </div>
 
-          {/* Combo Special Information */}
           {isCombo && (
             <div className="bg-amber-100/60 border-2 border-mustard rounded-2xl p-5 space-y-3">
               <div className="flex items-center justify-between">
@@ -164,7 +157,6 @@ export default function ItemDetails() {
             </div>
           )}
 
-          {/* Add-ons List */}
           {Array.isArray(item.addOns) && item.addOns.length > 0 && (
             <div className="space-y-3 pt-2">
               <div>
@@ -211,7 +203,6 @@ export default function ItemDetails() {
             </div>
           )}
 
-          {/* Pricing & Quantity Controls */}
           <div className="pt-6 border-t border-charcoal/10 space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -224,7 +215,6 @@ export default function ItemDetails() {
                 </span>
               </div>
 
-              {/* Quantity Selector */}
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-bold text-charcoal-muted hidden sm:inline">
                   {siteContent.itemDetails.quantityLabel}:
@@ -237,14 +227,12 @@ export default function ItemDetails() {
               </div>
             </div>
 
-            {/* Notification Alert */}
             {notification && (
               <div className="p-3 bg-mustard text-charcoal rounded-xl text-center font-bold text-sm shadow-xs animate-in fade-in duration-200">
                 {siteContent.itemDetails.addedNotification}
               </div>
             )}
 
-            {/* Add to Cart Button */}
             <Button
               type="button"
               size="lg"

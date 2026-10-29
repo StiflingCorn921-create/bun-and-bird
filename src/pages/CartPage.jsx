@@ -25,7 +25,6 @@ export default function CartPage() {
 
   const { user, isAuthenticated, openAuthModal, logout } = useAuth();
 
-  // Form state
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [deliveryAreaId, setDeliveryAreaId] = useState(SERVICED_DELIVERY_AREAS[0]?.id || '');
@@ -33,7 +32,13 @@ export default function CartPage() {
   const [selectedBranchId, setSelectedBranchId] = useState(branches[0]?.id || '');
   const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery');
 
-  // Pre-fill user data when authenticated
+  const [promoInput, setPromoInput] = useState('');
+  const [promoMessage, setPromoMessage] = useState({ type: null, text: '' });
+  const [errors, setErrors] = useState({});
+  const [placedOrder, setPlacedOrder] = useState(null);
+
+  const currency = siteContent.common.currencySymbol;
+
   useEffect(() => {
     if (user) {
       if (user.name && !customerName) setCustomerName(user.name);
@@ -42,7 +47,12 @@ export default function CartPage() {
     }
   }, [user]);
 
-  // When delivery area changes, auto-suggest the closest branch
+  const selectedArea = SERVICED_DELIVERY_AREAS.find((a) => a.id === deliveryAreaId);
+  const availableBranches =
+    cart.orderType === 'delivery' && selectedArea
+      ? branches.filter((b) => b.region === selectedArea.region)
+      : branches;
+
   const handleAreaChange = (areaId) => {
     setDeliveryAreaId(areaId);
     const area = SERVICED_DELIVERY_AREAS.find((a) => a.id === areaId);
@@ -51,19 +61,6 @@ export default function CartPage() {
     }
   };
 
-  // Promo state
-  const [promoInput, setPromoInput] = useState('');
-  const [promoMessage, setPromoMessage] = useState({ type: null, text: '' });
-
-  // Form validation errors
-  const [errors, setErrors] = useState({});
-
-  // Placed order state for confirmation screen
-  const [placedOrder, setPlacedOrder] = useState(null);
-
-  const currency = siteContent.common.currencySymbol;
-
-  // Handle promo code application
   const handleApplyPromo = (e) => {
     e.preventDefault();
     if (!promoInput.trim()) return;
@@ -88,7 +85,6 @@ export default function CartPage() {
     setPromoMessage({ type: null, text: '' });
   };
 
-  // Form validation
   const validateForm = () => {
     const newErrors = {};
 
@@ -130,12 +126,14 @@ export default function CartPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle checkout submission
   const handlePlaceOrder = (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const branch = branches.find((b) => b.id === selectedBranchId) || branches[0];
+    const branch =
+      availableBranches.find((b) => b.id === selectedBranchId) ||
+      availableBranches[0] ||
+      branches[0];
     const chosenArea = SERVICED_DELIVERY_AREAS.find((a) => a.id === deliveryAreaId);
 
     const newOrder = orderService.createOrder({
@@ -157,7 +155,6 @@ export default function CartPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Advance live order status
   const handleAdvanceStatus = () => {
     if (!placedOrder) return;
     const nextStatus = orderService.advanceStatus(placedOrder.status);
@@ -171,13 +168,11 @@ export default function CartPage() {
     );
   };
 
-  // ==================== CONFIRMATION PANEL ====================
   if (placedOrder) {
     const isCompleted = placedOrder.status === 'Completed';
 
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-8 animate-in fade-in duration-300">
-        {/* Success Header */}
         <div className="text-center space-y-3 bg-amber-100/60 border-2 border-mustard rounded-3xl p-6 sm:p-10 shadow-sm">
           <span className="text-6xl sm:text-7xl block select-none">
             {siteContent.confirmation.partyEmoji}
@@ -194,7 +189,6 @@ export default function CartPage() {
           </div>
         </div>
 
-        {/* Live Status Tracker */}
         <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 sm:p-8 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-charcoal/10 pb-4">
             <div>
@@ -222,7 +216,6 @@ export default function CartPage() {
             )}
           </div>
 
-          {/* Status Progress Steps */}
           <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
             {['Preparing', 'Ready', 'Completed'].map((step, idx) => {
               const orderIndex = ['Preparing', 'Ready', 'Completed'].indexOf(placedOrder.status);
@@ -252,9 +245,7 @@ export default function CartPage() {
           </div>
         </div>
 
-        {/* Order Details Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Fulfillment Info */}
           <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
             <h3 className="text-lg font-black text-charcoal border-b border-charcoal/10 pb-3">
               {siteContent.confirmation.fulfillmentDetailsTitle}
@@ -319,7 +310,6 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Ordered Items Summary */}
           <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4 flex flex-col justify-between">
             <div>
               <h3 className="text-lg font-black text-charcoal border-b border-charcoal/10 pb-3">
@@ -370,7 +360,6 @@ export default function CartPage() {
           </div>
         </div>
 
-        {/* Action Button */}
         <div className="text-center pt-4">
           <Button
             type="button"
@@ -385,7 +374,6 @@ export default function CartPage() {
     );
   }
 
-  // ==================== EMPTY CART STATE ====================
   if (!cart.items || cart.items.length === 0) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
@@ -400,7 +388,6 @@ export default function CartPage() {
     );
   }
 
-  // ==================== ACTIVE CART & CHECKOUT ====================
   const isOutsideArea =
     cart.orderType === 'delivery' && (!deliveryAreaId || deliveryAreaId === 'outside');
 
@@ -421,9 +408,7 @@ export default function CartPage() {
 
       <form onSubmit={handlePlaceOrder} noValidate>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          {/* Left Column: Line Items & Checkout Form */}
           <div className="lg:col-span-7 space-y-8">
-            {/* 1. Selected Items */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-charcoal/10 pb-3">
                 <h2 className="text-xl font-black text-charcoal">
@@ -444,7 +429,6 @@ export default function CartPage() {
                     key={item.id}
                     className="pt-4 first:pt-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                   >
-                    {/* Item Details */}
                     <div className="flex items-center gap-3">
                       <div className="w-16 h-16 rounded-2xl bg-amber-100 overflow-hidden shrink-0 border border-charcoal/10">
                         <FoodImage
@@ -493,7 +477,6 @@ export default function CartPage() {
                       </div>
                     </div>
 
-                    {/* Quantity & Subtotal Controls */}
                     <div className="flex items-center justify-between w-full sm:w-auto gap-4 shrink-0">
                       <QuantitySelector
                         quantity={item.quantity}
@@ -534,7 +517,6 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* 2. Choose Order Type (Pickup vs. Delivery) */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
               <h2 className="text-xl font-black text-charcoal">
                 {siteContent.cart.orderTypeTitle}
@@ -587,7 +569,6 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* Delivery Service Area (When delivery is chosen) */}
             {cart.orderType === 'delivery' && (
               <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-3">
                 <div className="flex items-center justify-between">
@@ -636,7 +617,6 @@ export default function CartPage() {
               </div>
             )}
 
-            {/* 3. Branch Selector */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-3">
               <h2 className="text-xl font-black text-charcoal">
                 {siteContent.cart.branchTitle}
@@ -648,7 +628,7 @@ export default function CartPage() {
                 className="w-full px-4 py-3 rounded-2xl bg-cream border-2 border-charcoal/15 font-semibold text-charcoal focus:border-ketchup focus:outline-none focus:ring-2 focus:ring-ketchup/20 text-sm cursor-pointer"
               >
                 <option value="">{siteContent.cart.branchSelectPlaceholder}</option>
-                {branches.map((b) => (
+                {availableBranches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name} {siteContent.common.dash} {b.address}
                   </option>
@@ -659,7 +639,6 @@ export default function CartPage() {
               )}
             </div>
 
-            {/* 4. Customer Account & Contact Details */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-charcoal/10 pb-3">
                 <h2 className="text-xl font-black text-charcoal">
@@ -676,7 +655,6 @@ export default function CartPage() {
                 )}
               </div>
 
-              {/* If user is not authenticated: Show friendly prompt to open modal */}
               {!isAuthenticated ? (
                 <div className="p-5 bg-amber-50/70 border-2 border-mustard/40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
@@ -734,7 +712,6 @@ export default function CartPage() {
                 <p className="text-xs font-bold text-red-600">{errors.auth}</p>
               )}
 
-              {/* Contact Information Fields */}
               <div className="space-y-4 pt-2">
                 <div>
                   <label className="text-xs font-bold text-charcoal-muted block mb-1">
@@ -788,7 +765,6 @@ export default function CartPage() {
               </div>
             </div>
 
-            {/* 5. Payment Method */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-4">
               <h2 className="text-xl font-black text-charcoal">
                 {siteContent.cart.paymentTitle}
@@ -830,9 +806,7 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* Right Column: Promo Code & Order Summary */}
           <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-28">
-            {/* Promo Code Box */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 space-y-3">
               <h3 className="text-base font-black text-charcoal">
                 {siteContent.cart.promoTitle}
@@ -893,14 +867,12 @@ export default function CartPage() {
               )}
             </div>
 
-            {/* Order Totals Summary Card */}
             <div className="bg-cream-light border-2 border-charcoal/10 rounded-3xl p-6 sm:p-8 space-y-5 shadow-lg">
               <h3 className="text-xl font-black text-charcoal border-b border-charcoal/10 pb-3">
                 {siteContent.cart.summaryTitle}
               </h3>
 
               <div className="space-y-3 text-sm sm:text-base">
-                {/* Subtotal */}
                 <div className="flex items-center justify-between">
                   <span className="text-charcoal-muted font-medium">
                     {siteContent.cart.subtotalLabel}
@@ -911,7 +883,6 @@ export default function CartPage() {
                   </span>
                 </div>
 
-                {/* Discount */}
                 {cart.getDiscount() > 0 && (
                   <div className="flex items-center justify-between text-green-700">
                     <span className="font-medium">{siteContent.cart.discountLabel}</span>
@@ -923,7 +894,6 @@ export default function CartPage() {
                   </div>
                 )}
 
-                {/* Delivery Fee */}
                 <div className="flex items-center justify-between">
                   <span className="text-charcoal-muted font-medium">
                     {siteContent.cart.deliveryFeeLabel}
@@ -937,7 +907,6 @@ export default function CartPage() {
                   </span>
                 </div>
 
-                {/* Total */}
                 <div className="pt-4 border-t-2 border-charcoal/15 flex items-center justify-between">
                   <span className="text-lg font-black text-charcoal">
                     {siteContent.cart.totalLabel}
@@ -961,7 +930,6 @@ export default function CartPage() {
                 </p>
               )}
 
-              {/* Place Order CTA Button */}
               <Button
                 type="submit"
                 variant="primary"

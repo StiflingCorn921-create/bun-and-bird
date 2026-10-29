@@ -16,7 +16,6 @@ export default function Menu() {
   const [selectedTag, setSelectedTag] = useState('all');
   const [sortOption, setSortOption] = useState('default');
 
-  // Filter and sort items via menuService
   const filteredItems = useMemo(() => {
     return menuService.searchAndFilter({
       items: allMenuItems,
@@ -48,15 +47,12 @@ export default function Menu() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 space-y-8">
-      {/* Page Title */}
       <SectionHeading
         title={siteContent.menu.title}
         subtitle={siteContent.menu.subtitle}
       />
 
-      {/* Search and Sort Toolbar */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-        {/* Search Bar */}
         <div className="md:col-span-8">
           <SearchBar
             value={searchQuery}
@@ -65,7 +61,6 @@ export default function Menu() {
           />
         </div>
 
-        {/* Sort Select */}
         <div className="md:col-span-4 flex items-center justify-end gap-2">
           <label htmlFor="menu-sort" className="text-xs sm:text-sm font-bold text-charcoal-muted whitespace-nowrap">
             {siteContent.menu.sortLabel}
@@ -84,7 +79,6 @@ export default function Menu() {
         </div>
       </div>
 
-      {/* Category Tabs */}
       <div className="border-y border-charcoal/10 py-3">
         <CategoryTabs
           categories={categories}
@@ -93,9 +87,7 @@ export default function Menu() {
         />
       </div>
 
-      {/* Tag Filter Chips & Results Count */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-1">
-        {/* Tag chips */}
         <div className="flex flex-wrap items-center gap-1.5">
           {TAG_OPTIONS.map((tag) => {
             const isSelected = selectedTag === tag;
@@ -117,13 +109,11 @@ export default function Menu() {
           })}
         </div>
 
-        {/* Results Counter */}
         <span className="text-xs sm:text-sm font-semibold text-charcoal-muted">
           {resultsCountText}
         </span>
       </div>
 
-      {/* Menu Grid or Empty State */}
       {filteredItems.length === 0 ? (
         <EmptyState
           emoji="🍔"

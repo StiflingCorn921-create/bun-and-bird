@@ -19,7 +19,6 @@ export function AuthModal() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && isAuthModalOpen) {
@@ -30,7 +29,6 @@ export function AuthModal() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAuthModalOpen, closeAuthModal]);
 
-  // Reset form when modal opens or mode changes
   useEffect(() => {
     setError('');
   }, [isAuthModalOpen, authModalMode]);
@@ -70,7 +68,6 @@ export function AuthModal() {
         className="relative w-full max-w-md bg-cream border-2 border-charcoal/15 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
         <button
           type="button"
           onClick={closeAuthModal}
@@ -82,7 +79,6 @@ export function AuthModal() {
           </svg>
         </button>
 
-        {/* Modal Header */}
         <div className="text-center space-y-1">
           <div className="w-12 h-12 mx-auto rounded-2xl bg-amber-100 border border-mustard/40 flex items-center justify-center text-2xl select-none mb-3">
             🍔
@@ -97,7 +93,6 @@ export function AuthModal() {
           </p>
         </div>
 
-        {/* Tabs */}
         <div className="flex bg-amber-100/60 p-1 rounded-xl">
           <button
             type="button"
@@ -129,14 +124,12 @@ export function AuthModal() {
           </button>
         </div>
 
-        {/* Error message */}
         {error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-bold">
             {error}
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           {authModalMode === 'signup' && (
             <div>
@@ -195,7 +188,6 @@ export function AuthModal() {
           </Button>
         </form>
 
-        {/* Bottom hint */}
         <div className="text-center pt-2 border-t border-charcoal/10">
           <p className="text-[11px] text-charcoal-muted">
             Simple & fast login • No confirmation codes required

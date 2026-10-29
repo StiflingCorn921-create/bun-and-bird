@@ -1,37 +1,40 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { siteContent } from '../data/siteContent';
-import { combos, allMenuItems } from '../data';
+import { combos, allMenuItems, menuItemsMap } from '../data';
 import { MenuCard } from '../components/MenuCard';
 import { SectionHeading } from '../components/SectionHeading';
 import { Badge } from '../components/Badge';
+import { FoodImage } from '../components/FoodImage';
 
 export default function Home() {
-  const heroEmojis = siteContent.brand.heroEmojis || [siteContent.brand.logoEmoji];
-  const [emojiIndex, setEmojiIndex] = useState(0);
+  const heroSlides = (siteContent.brand.heroSlideIds || [])
+    .map((id) => menuItemsMap.get(id))
+    .filter(Boolean);
+  const [slideIndex, setSlideIndex] = useState(0);
 
   useEffect(() => {
+    if (heroSlides.length <= 1) return;
     const timer = setInterval(() => {
-      setEmojiIndex((prev) => (prev + 1) % heroEmojis.length);
-    }, 1800);
+      setSlideIndex((prev) => (prev + 1) % heroSlides.length);
+    }, 3000);
     return () => clearInterval(timer);
-  }, [heroEmojis.length]);
+  }, [heroSlides.length]);
 
-  // Best seller items
+  const activeSlide = heroSlides[slideIndex] || allMenuItems[0];
+  const currency = siteContent.common.currencySymbol;
+
   const bestSellers = allMenuItems
     .filter((item) => Array.isArray(item.tags) && item.tags.includes('best seller'))
     .slice(0, 4);
 
-  // Featured combos
   const featuredCombos = combos.slice(0, 3);
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-20">
-      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-amber-100/70 to-cream border-b border-charcoal/10 py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Content */}
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
               <div className="inline-block">
                 <Badge variant="mustard">{siteContent.home.heroBadge}</Badge>
@@ -45,41 +48,68 @@ export default function Home() {
                 {siteContent.home.heroSubtitle}
               </p>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+              <div className="flex items-center justify-center lg:justify-start pt-4">
                 <Link
                   to="/menu"
                   className="w-full sm:w-auto px-8 py-4 rounded-xl font-black text-lg bg-ketchup text-cream hover:bg-ketchup-hover shadow-lg hover:shadow-xl transition-all active:scale-95 text-center"
                 >
                   {siteContent.home.ctaOrder}
                 </Link>
-                <Link
-                  to="/menu"
-                  className="w-full sm:w-auto px-8 py-4 rounded-xl font-black text-lg bg-mustard text-charcoal hover:bg-mustard-hover shadow-md hover:shadow-lg transition-all active:scale-95 text-center"
-                >
-                  {siteContent.home.ctaCombos}
-                </Link>
               </div>
             </div>
 
-            {/* Right Hero Graphic */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-72 h-72 sm:w-96 sm:h-96 rounded-3xl bg-amber-200/50 border-4 border-mustard/40 flex items-center justify-center shadow-2xl p-6 select-none">
-                <div className="text-center space-y-4">
-                  <div className="text-8xl sm:text-9xl animate-bounce">
-                    {heroEmojis[emojiIndex]}
+            <div className="lg:col-span-5 flex flex-col items-center gap-4">
+              {activeSlide && (
+                <Link
+                  to={`/menu/${activeSlide.id}`}
+                  className="group relative w-72 h-72 sm:w-96 sm:h-96 rounded-3xl bg-amber-200/50 border-4 border-mustard/40 overflow-hidden shadow-2xl block"
+                >
+                  <FoodImage
+                    key={activeSlide.id}
+                    src={activeSlide.image}
+                    alt={activeSlide.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    containerClassName="w-full h-full"
+                  />
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal/90 via-charcoal/60 to-transparent p-5 flex items-end justify-between">
+                    <div>
+                      <span className="text-cream font-black text-lg sm:text-xl block leading-tight">
+                        {activeSlide.name}
+                      </span>
+                      <span className="text-cream/80 text-xs font-medium line-clamp-1">
+                        {activeSlide.description}
+                      </span>
+                    </div>
+                    <span className="bg-mustard text-charcoal font-black text-sm px-3 py-1 rounded-lg shrink-0 ml-3">
+                      {currency}
+                      {activeSlide.price}
+                    </span>
                   </div>
-                  <div className="inline-block bg-charcoal text-cream text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
-                    {siteContent.brand.tagline}
-                  </div>
+                </Link>
+              )}
+
+              {heroSlides.length > 1 && (
+                <div className="flex items-center gap-2">
+                  {heroSlides.map((slide, idx) => (
+                    <button
+                      key={slide.id}
+                      type="button"
+                      onClick={() => setSlideIndex(idx)}
+                      aria-label={`${siteContent.home.heroSlideAria} ${idx + 1}`}
+                      className={`h-2.5 rounded-full transition-all cursor-pointer ${
+                        idx === slideIndex
+                          ? 'w-8 bg-ketchup'
+                          : 'w-2.5 bg-charcoal/25 hover:bg-charcoal/45'
+                      }`}
+                    />
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Featured Best Sellers Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
           <SectionHeading
@@ -111,7 +141,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Deals & Combos Section */}
       <section className="bg-amber-100/50 border-y border-charcoal/10 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeading
@@ -130,7 +159,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Why Us Strip */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeading
           centered

@@ -2,98 +2,90 @@ import { MenuItem } from '../models/MenuItem';
 import { burgerAddOns, chickenAddOns, sidesAddOns } from './addOns';
 
 export const menuItems = [
-  // TODO: [IMAGE 01] Save your photo as public/images/classic-bun-burger.jpg
   new MenuItem({
     id: 'burger-classic',
     name: 'Classic Bun Burger',
     description: 'Classic Burger with a side of fries.',
     price: 170,
     categoryId: 'burgers',
-    image: '/images/classic-bun-burger.jpg',
+    image: '/images/classicburger.jpg',
     tags: ['best seller'],
     addOns: burgerAddOns,
   }),
 
-  // TODO: [IMAGE 02] Save your photo as public/images/crispy-bird-box.jpg
   new MenuItem({
     id: 'chicken-2pc',
     name: 'Crispy Bird Box',
     description: 'Signature fried chicken with a side of fries.',
     price: 220,
     categoryId: 'chicken',
-    image: '/images/crispy-bird-box.jpg',
+    image: '/images/crispybirdbox.png',
     tags: ['best seller'],
     addOns: chickenAddOns,
   }),
 
-  // TODO: [IMAGE 03] Save your photo as public/images/double-stack.jpg
   new MenuItem({
     id: 'burger-double-stack',
     name: 'Double Stack',
     description: 'Double Patty burger with a side of fries and fried onion rings.',
     price: 210,
     categoryId: 'burgers',
-    image: '/images/double-stack.jpg',
+    image: '/images/doublestack.png',
     tags: ['best seller', 'new'],
     addOns: burgerAddOns,
   }),
 
-  // TODO: [IMAGE 04] Save your photo as public/images/chicken-sandwich.jpg
   new MenuItem({
     id: 'chicken-sandwich',
     name: 'Chicken Sandwich',
     description: 'Best of both worlds mixed together for the perfect bite.',
     price: 180,
     categoryId: 'chicken',
-    image: '/images/chicken-sandwich.jpg',
+    image: '/images/chickensandwhich.png',
     tags: ['best seller'],
     addOns: chickenAddOns,
   }),
 
-  // TODO: [IMAGE 05] Save your photo as public/images/spicy-bird-burger.jpg
   new MenuItem({
     id: 'burger-spicy-chicken',
     name: 'Spicy Bird Burger',
     description: 'Fiery fried chicken topped with spicy sauce and fresh lettuce.',
     price: 190,
     categoryId: 'burgers',
-    image: '/images/spicy-bird-burger.jpg',
+    image: '/images/spicyburger.png',
     tags: ['spicy'],
     addOns: burgerAddOns,
   }),
 
-  // TODO: [IMAGE 06] Save your photo as public/images/six-piece-wings.jpg
   new MenuItem({
     id: 'chicken-spicy-wings',
     name: 'Six-Piece Wings',
     description: 'Six crispy, golden wings tossed in your choice of sauce.',
     price: 160,
     categoryId: 'chicken',
-    image: '/images/six-piece-wings.jpg',
+    image: '/images/sixpiecewings.png',
     tags: ['spicy'],
     addOns: chickenAddOns,
   }),
 
-  // TODO: [IMAGE 07] Save your photo as public/images/loaded-fries.jpg
   new MenuItem({
     id: 'side-potato-wedges',
     name: 'Loaded Fries',
     description: 'Golden fries smothered in warm cheese sauce and savory toppings.',
     price: 130,
     categoryId: 'sides',
-    image: '/images/loaded-fries.jpg',
+    image: '/images/loadedfries.png',
     tags: ['new'],
     addOns: sidesAddOns,
   }),
 
-  // TODO: [IMAGE 08] Save your photo as public/images/veggie-stack.jpg
   new MenuItem({
     id: 'burger-veggie',
     name: 'Veggie Stack',
     description: 'A thick plant-based patty stacked with fresh greens and house sauce.',
     price: 170,
     categoryId: 'burgers',
-    image: '/images/veggie-stack.jpg',
+    image: '/images/veggiestack.png',
     tags: ['vegetarian-friendly'],
     addOns: [burgerAddOns[0], burgerAddOns[3]],
   }),

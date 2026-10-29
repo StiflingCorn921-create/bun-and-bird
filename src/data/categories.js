@@ -5,7 +5,5 @@ export const categories = [
   new Category({ id: 'chicken', label: 'Chicken' }),
   new Category({ id: 'combos', label: 'Combos' }),
   new Category({ id: 'sides', label: 'Sides' }),
-  new Category({ id: 'drinks', label: 'Drinks' }),
-  new Category({ id: 'desserts', label: 'Desserts' }),
 ];
 

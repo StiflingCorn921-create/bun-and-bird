@@ -7,6 +7,7 @@ export const branches = [
     address: 'Unit 102, 7th Ave corner 28th St, Bonifacio High Street, Taguig City, Metro Manila',
     hours: '10:00 AM - 11:00 PM (Daily)',
     phone: '(02) 8812-4567',
+    region: 'Metro Manila',
   }),
   new Branch({
     id: 'branch-ayala-cebu',
@@ -14,6 +15,7 @@ export const branches = [
     address: 'Cebu Business Park, Archbishop Reyes Avenue corner Cardinal Rosales Avenue, Barangay Luz, Cebu City',
     hours: '9:00 AM - 10:00 PM (Daily)',
     phone: '(02) 8845-9012',
+    region: 'Metro Cebu',
   }),
   new Branch({
     id: 'branch-qc',
@@ -21,6 +23,7 @@ export const branches = [
     address: '8 River Walk',
     hours: 'Mon–Sun · 11:00–22:00',
     phone: '(555) 014-0363',
+    region: 'Metro Manila',
   }),
   new Branch({
     id: 'branch-seaside-cebu',
@@ -28,7 +31,8 @@ export const branches = [
     address: 'Cebu South Coastal Road corner F. Vestil Street, South Road Properties (SRP), Brgy. Mambaling, Cebu City',
     hours: 'Mon–Sun · 10:00–23:00',
     phone: '(555) 014-0454',
+    region: 'Metro Cebu',
   }),
 ];
 
-export const branchesMap = new Map(branches.map(b => [b.id, b]));
+export const branchesMap = new Map(branches.map((b) => [b.id, b]));

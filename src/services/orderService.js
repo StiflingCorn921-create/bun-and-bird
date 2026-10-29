@@ -8,20 +8,20 @@ export const SERVICED_DELIVERY_AREAS = [
   { id: 'pasig', name: 'Pasig / Ortigas', region: 'Metro Manila', branchId: 'branch-bgc' },
   { id: 'qc', name: 'Quezon City (Tomas Morato / Diliman / New Manila)', region: 'Metro Manila', branchId: 'branch-qc' },
   { id: 'mandaluyong', name: 'Mandaluyong / San Juan', region: 'Metro Manila', branchId: 'branch-bgc' },
-  { id: 'cebu-city', name: 'Cebu City (Ayala / Lahug / Mabolo / Downtown)', region: 'Metro Cebu', branchId: 'branch-cebu' },
-  { id: 'cebu-srp', name: 'Cebu SRP / SM Seaside / Mambaling / Talisay', region: 'Metro Cebu', branchId: 'branch-sm-seaside' },
-  { id: 'mandaue', name: 'Mandaue City', region: 'Metro Cebu', branchId: 'branch-cebu' },
+  { id: 'cebu-city', name: 'Cebu City (Ayala / Lahug / Mabolo / Downtown)', region: 'Metro Cebu', branchId: 'branch-ayala-cebu' },
+  { id: 'cebu-srp', name: 'Cebu SRP / SM Seaside / Mambaling / Talisay', region: 'Metro Cebu', branchId: 'branch-seaside-cebu' },
+  { id: 'mandaue', name: 'Mandaue City', region: 'Metro Cebu', branchId: 'branch-ayala-cebu' },
 ];
 
-export const orderService = {
+export class OrderService {
   getServicedAreas() {
     return SERVICED_DELIVERY_AREAS;
-  },
+  }
 
   isAreaCovered(areaId) {
     if (!areaId) return false;
     return SERVICED_DELIVERY_AREAS.some((area) => area.id === areaId);
-  },
+  }
 
   createOrder({ items, customer, orderType, branch, total, paymentMethod = 'Cash on Delivery', deliveryArea = null }) {
     const orderId = `BNB-${Math.floor(100000 + Math.random() * 900000)}`;
@@ -47,12 +47,13 @@ export const orderService = {
     }
 
     return newOrder;
-  },
+  }
 
   advanceStatus(currentStatus) {
     if (currentStatus === 'Preparing') return 'Ready';
     if (currentStatus === 'Ready') return 'Completed';
     return currentStatus;
-  },
-};
+  }
+}
 
+export const orderService = new OrderService();

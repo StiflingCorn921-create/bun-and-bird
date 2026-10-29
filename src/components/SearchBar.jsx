@@ -3,7 +3,6 @@ import { siteContent } from '../data/siteContent';
 export function SearchBar({ value, onChange, onClear, className = '' }) {
   return (
     <div className={`relative flex items-center w-full ${className}`}>
-      {/* Search Icon */}
       <div className="absolute left-4 pointer-events-none text-charcoal-muted">
         <svg
           className="w-5 h-5"

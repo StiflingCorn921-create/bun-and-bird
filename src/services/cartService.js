@@ -1,18 +1,18 @@
-import { Cart } from '../models/Cart';
+import { Cart, DELIVERY_FEE } from '../models/Cart';
 import { CartItem } from '../models/CartItem';
 import { promos as defaultPromos } from '../data/promos';
 
 const CART_STORAGE_KEY = 'bun_bird_cart';
-export const DELIVERY_FEE = 49;
+export { DELIVERY_FEE };
 
-export const cartService = {
+export class CartService {
   loadCart() {
     try {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
       if (!saved) return new Cart([], null, 'pickup');
       const parsed = JSON.parse(saved);
       if (!parsed || !Array.isArray(parsed.items)) return new Cart([], null, 'pickup');
-      const items = (parsed.items || [])
+      const items = parsed.items
         .filter((raw) => raw && raw.menuItem)
         .map(
           (raw) =>
@@ -27,7 +27,7 @@ export const cartService = {
     } catch {
       return new Cart([], null, 'pickup');
     }
-  },
+  }
 
   saveCart(cart) {
     try {
@@ -40,17 +40,17 @@ export const cartService = {
         })
       );
     } catch (e) {
-      console.warn('Failed to save cart to localStorage:', e);
+      console.warn('Failed to save cart:', e);
     }
-  },
+  }
 
   clearCartStorage() {
     try {
       localStorage.removeItem(CART_STORAGE_KEY);
     } catch (e) {
-      console.warn('Failed to clear cart storage:', e);
+      console.warn('Failed to clear cart:', e);
     }
-  },
+  }
 
   addItem(cart, incomingItem) {
     const incomingAddOnsKey = (incomingItem.selectedAddOns || [])
@@ -87,14 +87,14 @@ export const cartService = {
     const nextCart = new Cart(newItems, cart.promo, cart.orderType);
     this.saveCart(nextCart);
     return nextCart;
-  },
+  }
 
   removeItem(cart, id) {
     const newItems = cart.items.filter((item) => item.id !== id && item.menuItem?.id !== id);
     const nextCart = new Cart(newItems, cart.promo, cart.orderType);
     this.saveCart(nextCart);
     return nextCart;
-  },
+  }
 
   updateQuantity(cart, id, quantity) {
     const nextQty = Number(quantity);
@@ -115,13 +115,13 @@ export const cartService = {
     const nextCart = new Cart(newItems, cart.promo, cart.orderType);
     this.saveCart(nextCart);
     return nextCart;
-  },
+  }
 
   setOrderType(cart, orderType) {
     const nextCart = new Cart(cart.items, cart.promo, orderType);
     this.saveCart(nextCart);
     return nextCart;
-  },
+  }
 
   applyPromo(cart, code, promoList = defaultPromos) {
     if (!code || typeof code !== 'string') return { success: false, cart };
@@ -135,17 +135,18 @@ export const cartService = {
       return { success: true, cart: nextCart, promo: match };
     }
     return { success: false, cart };
-  },
+  }
 
   removePromo(cart) {
     const nextCart = new Cart(cart.items, null, cart.orderType);
     this.saveCart(nextCart);
     return nextCart;
-  },
+  }
 
   clearCart(cart) {
     this.clearCartStorage();
     return new Cart([], null, cart?.orderType || 'pickup');
-  },
-};
+  }
+}
 
+export const cartService = new CartService();

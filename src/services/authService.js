@@ -3,7 +3,7 @@ import { User } from '../models/User';
 const CURRENT_USER_KEY = 'bun_bird_user';
 const REGISTERED_USERS_KEY = 'bun_bird_users_db';
 
-export const authService = {
+export class AuthService {
   getCurrentUser() {
     try {
       const raw = localStorage.getItem(CURRENT_USER_KEY);
@@ -17,7 +17,7 @@ export const authService = {
     } catch {
       return null;
     }
-  },
+  }
 
   getAllUsers() {
     try {
@@ -26,7 +26,7 @@ export const authService = {
     } catch {
       return [];
     }
-  },
+  }
 
   login({ identifier, password }) {
     if (!identifier?.trim()) {
@@ -48,11 +48,10 @@ export const authService = {
     if (existing) {
       user = new User(existing);
     } else {
-      // Frictionless fallback login: creates session with friendly name
       const isEmail = cleanId.includes('@');
       const defaultName = isEmail
         ? cleanId.split('@')[0].replace(/[._-]/g, ' ')
-        : 'Bun & Bird Guest';
+        : 'Bun & Bird Customer';
       const formattedName =
         defaultName.charAt(0).toUpperCase() + defaultName.slice(1);
 
@@ -68,7 +67,7 @@ export const authService = {
 
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
     return user;
-  },
+  }
 
   signup({ name, email, phone, password, address = '', city = 'Taguig' }) {
     if (!name?.trim()) {
@@ -90,18 +89,17 @@ export const authService = {
       city: city.trim(),
     });
 
-    // Save to user registry
     try {
       const users = this.getAllUsers();
       users.push(newUser);
       localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(users));
     } catch (e) {
-      console.warn('Failed to save user to registry:', e);
+      console.warn('Failed to save user:', e);
     }
 
     localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(newUser));
     return newUser;
-  },
+  }
 
   logout() {
     try {
@@ -109,5 +107,7 @@ export const authService = {
     } catch (e) {
       console.warn('Logout error:', e);
     }
-  },
-};
+  }
+}
+
+export const authService = new AuthService();

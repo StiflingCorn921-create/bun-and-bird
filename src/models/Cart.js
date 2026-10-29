@@ -17,18 +17,13 @@ export class Cart {
   getDiscount() {
     if (!this.promo) return 0;
     const subtotal = this.getSubtotal();
-    if (this.promo.type === 'percent') {
-      return (subtotal * this.promo.value) / 100;
-    }
-    if (this.promo.type === 'fixed') {
-      return Math.min(subtotal, this.promo.value);
-    }
+    if (this.promo.type === 'percent') return (subtotal * this.promo.value) / 100;
+    if (this.promo.type === 'fixed') return Math.min(subtotal, this.promo.value);
     return 0;
   }
 
   getDeliveryFee() {
-    if (this.orderType !== 'delivery') return 0;
-    if (this.promo?.type === 'freeDelivery') return 0;
+    if (this.orderType !== 'delivery' || this.promo?.type === 'freeDelivery') return 0;
     return DELIVERY_FEE;
   }
 
@@ -37,7 +32,6 @@ export class Cart {
   }
 
   getTotal() {
-    const total = this.getSubtotal() - this.getDiscount() + this.getDeliveryFee();
-    return Math.max(0, total);
+    return Math.max(0, this.getSubtotal() - this.getDiscount() + this.getDeliveryFee());
   }
 }

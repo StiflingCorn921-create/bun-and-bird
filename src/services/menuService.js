@@ -1,4 +1,4 @@
-export const menuService = {
+export class MenuService {
   searchAndFilter({
     items = [],
     query = '',
@@ -8,12 +8,10 @@ export const menuService = {
   }) {
     let result = [...items];
 
-    // Filter by category
     if (categoryId && categoryId !== 'all') {
       result = result.filter((item) => item.categoryId === categoryId);
     }
 
-    // Filter by search query
     if (query && query.trim()) {
       const q = query.trim().toLowerCase();
       result = result.filter((item) => {
@@ -25,14 +23,12 @@ export const menuService = {
       });
     }
 
-    // Filter by active tag
     if (activeTag) {
       result = result.filter(
         (item) => Array.isArray(item.tags) && item.tags.includes(activeTag)
       );
     }
 
-    // Sort
     if (sortBy === 'price-asc') {
       result.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-desc') {
@@ -42,6 +38,7 @@ export const menuService = {
     }
 
     return result;
-  },
-};
+  }
+}
 
+export const menuService = new MenuService();

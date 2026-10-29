@@ -34,7 +34,6 @@ export function MenuCard({ item }) {
 
   return (
     <div className="group bg-cream-light border-2 border-charcoal/10 hover:border-ketchup/40 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-xl relative overflow-hidden">
-      {/* Top Section: Emoji Tile & Tags */}
       <div>
         <Link
           to={`/menu/${item.id}`}
@@ -58,7 +57,6 @@ export function MenuCard({ item }) {
           )}
         </Link>
 
-        {/* Tags */}
         {Array.isArray(item.tags) && item.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2.5">
             {item.tags.map((tag) => (
@@ -72,19 +70,16 @@ export function MenuCard({ item }) {
           </div>
         )}
 
-        {/* Item Title */}
         <Link to={`/menu/${item.id}`} className="block focus:outline-none">
           <h3 className="text-xl font-black text-charcoal group-hover:text-ketchup transition-colors line-clamp-1">
             {item.name}
           </h3>
         </Link>
 
-        {/* Description */}
         <p className="mt-1.5 text-xs sm:text-sm text-charcoal-muted line-clamp-2 leading-relaxed">
           {item.description}
         </p>
 
-        {/* Combo Included Items Preview */}
         {isCombo && Array.isArray(item.includedItems) && item.includedItems.length > 0 && (
           <div className="mt-2 text-xs text-charcoal/70 bg-charcoal/5 px-2.5 py-1.5 rounded-lg line-clamp-1">
             <span className="font-bold">{siteContent.itemDetails.includedItemsTitle} </span>
@@ -93,7 +88,6 @@ export function MenuCard({ item }) {
         )}
       </div>
 
-      {/* Bottom Section: Price & Action Buttons */}
       <div className="mt-5 pt-4 border-t border-charcoal/10 flex items-center justify-between gap-3">
         <div>
           <span className="text-xs text-charcoal-muted block font-semibold">

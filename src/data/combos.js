@@ -3,14 +3,13 @@ import { menuItemsMap } from './menuItems';
 import { comboAddOns } from './addOns';
 
 export const combos = [
-  // TODO: [IMAGE 09] Save your photo as public/images/burger-combo.jpg
   new Combo({
     id: 'combo-burger',
     name: 'Burger Combo',
     description: 'Two mains, two sides, two drinks',
     price: 360,
     categoryId: 'combos',
-    image: '/images/burger-combo.jpg',
+    image: '/images/burgercombo.png',
     tags: ['best seller'],
     addOns: comboAddOns,
     includedItems: [
@@ -21,14 +20,13 @@ export const combos = [
     discount: 50,
   }),
 
-  // TODO: [IMAGE 10] Save your photo as public/images/chicken-combo.jpg
   new Combo({
     id: 'combo-chicken',
     name: 'Chicken Combo',
     description: 'Eight pieces, four sides, four drinks',
     price: 360,
     categoryId: 'combos',
-    image: '/images/chicken-combo.jpg',
+    image: '/images/chickencombo.png',
     tags: ['best seller'],
     addOns: comboAddOns,
     includedItems: [
