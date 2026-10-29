@@ -3,6 +3,7 @@ import { menuItemsMap } from './menuItems';
 import { comboAddOns } from './addOns';
 
 export const combos = [
+  // TODO: [IMAGE 09] Save your photo as public/images/burger-combo.jpg
   new Combo({
     id: 'combo-burger',
     name: 'Burger Combo',
@@ -19,6 +20,8 @@ export const combos = [
     ].filter(Boolean),
     discount: 50,
   }),
+
+  // TODO: [IMAGE 10] Save your photo as public/images/chicken-combo.jpg
   new Combo({
     id: 'combo-chicken',
     name: 'Chicken Combo',

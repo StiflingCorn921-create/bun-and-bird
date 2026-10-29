@@ -9,6 +9,10 @@ export const authService = {
       const raw = localStorage.getItem(CURRENT_USER_KEY);
       if (!raw) return null;
       const data = JSON.parse(raw);
+      if (!data || typeof data !== 'object' || !data.name) {
+        localStorage.removeItem(CURRENT_USER_KEY);
+        return null;
+      }
       return new User(data);
     } catch {
       return null;

@@ -2,6 +2,7 @@ import { MenuItem } from '../models/MenuItem';
 import { burgerAddOns, chickenAddOns, sidesAddOns } from './addOns';
 
 export const menuItems = [
+  // TODO: [IMAGE 01] Save your photo as public/images/classic-bun-burger.jpg
   new MenuItem({
     id: 'burger-classic',
     name: 'Classic Bun Burger',
@@ -12,6 +13,8 @@ export const menuItems = [
     tags: ['best seller'],
     addOns: burgerAddOns,
   }),
+
+  // TODO: [IMAGE 02] Save your photo as public/images/crispy-bird-box.jpg
   new MenuItem({
     id: 'chicken-2pc',
     name: 'Crispy Bird Box',
@@ -22,6 +25,8 @@ export const menuItems = [
     tags: ['best seller'],
     addOns: chickenAddOns,
   }),
+
+  // TODO: [IMAGE 03] Save your photo as public/images/double-stack.jpg
   new MenuItem({
     id: 'burger-double-stack',
     name: 'Double Stack',
@@ -32,6 +37,8 @@ export const menuItems = [
     tags: ['best seller', 'new'],
     addOns: burgerAddOns,
   }),
+
+  // TODO: [IMAGE 04] Save your photo as public/images/chicken-sandwich.jpg
   new MenuItem({
     id: 'chicken-sandwich',
     name: 'Chicken Sandwich',
@@ -42,6 +49,8 @@ export const menuItems = [
     tags: ['best seller'],
     addOns: chickenAddOns,
   }),
+
+  // TODO: [IMAGE 05] Save your photo as public/images/spicy-bird-burger.jpg
   new MenuItem({
     id: 'burger-spicy-chicken',
     name: 'Spicy Bird Burger',
@@ -52,6 +61,8 @@ export const menuItems = [
     tags: ['spicy'],
     addOns: burgerAddOns,
   }),
+
+  // TODO: [IMAGE 06] Save your photo as public/images/six-piece-wings.jpg
   new MenuItem({
     id: 'chicken-spicy-wings',
     name: 'Six-Piece Wings',
@@ -62,6 +73,8 @@ export const menuItems = [
     tags: ['spicy'],
     addOns: chickenAddOns,
   }),
+
+  // TODO: [IMAGE 07] Save your photo as public/images/loaded-fries.jpg
   new MenuItem({
     id: 'side-potato-wedges',
     name: 'Loaded Fries',
@@ -72,6 +85,8 @@ export const menuItems = [
     tags: ['new'],
     addOns: sidesAddOns,
   }),
+
+  // TODO: [IMAGE 08] Save your photo as public/images/veggie-stack.jpg
   new MenuItem({
     id: 'burger-veggie',
     name: 'Veggie Stack',

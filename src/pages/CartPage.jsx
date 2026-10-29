@@ -715,14 +715,14 @@ export default function CartPage() {
                 <div className="p-4 bg-green-50 border-2 border-green-200 rounded-2xl flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-green-700 text-cream font-black flex items-center justify-center text-xs">
-                      {user.name.charAt(0).toUpperCase()}
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <div>
                       <span className="text-xs font-bold text-green-900 block">
-                        {siteContent.auth.signedInAs} <strong>{user.name}</strong>
+                        {siteContent.auth.signedInAs} <strong>{user?.name || 'Account'}</strong>
                       </span>
                       <span className="text-[11px] text-green-800">
-                        {user.email || user.phone}
+                        {user?.email || user?.phone || ''}
                       </span>
                     </div>
                   </div>

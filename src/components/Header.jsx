@@ -68,7 +68,7 @@ export function Header({ itemCount: propItemCount }) {
 
           {/* Desktop Right CTA: Cart & Account */}
           <div className="hidden md:flex items-center gap-3">
-            {isAuthenticated ? (
+            {isAuthenticated && user ? (
               <div className="relative">
                 <button
                   type="button"
@@ -76,9 +76,9 @@ export function Header({ itemCount: propItemCount }) {
                   className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-charcoal/5 border border-charcoal/10 text-xs font-bold text-charcoal hover:bg-charcoal/10 transition-colors cursor-pointer"
                 >
                   <div className="w-6 h-6 rounded-full bg-mustard text-charcoal font-black flex items-center justify-center text-[10px]">
-                    {user.name.charAt(0).toUpperCase()}
+                    {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
-                  <span className="max-w-[100px] truncate">{user.name}</span>
+                  <span className="max-w-[100px] truncate">{user?.name || 'Account'}</span>
                   <svg className="w-3.5 h-3.5 text-charcoal-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -91,10 +91,10 @@ export function Header({ itemCount: propItemCount }) {
                   >
                     <div className="px-2 py-1 border-b border-charcoal/10">
                       <span className="text-xs font-bold text-charcoal block truncate">
-                        {user.name}
+                        {user?.name || 'Account'}
                       </span>
                       <span className="text-[11px] text-charcoal-muted block truncate">
-                        {user.email || user.phone}
+                        {user?.email || user?.phone || ''}
                       </span>
                     </div>
                     <button
@@ -264,14 +264,14 @@ export function Header({ itemCount: propItemCount }) {
 
           {/* Mobile Auth button */}
           <div className="pt-2 border-t border-charcoal/10">
-            {isAuthenticated ? (
+            {isAuthenticated && user ? (
               <div className="flex items-center justify-between p-3 bg-charcoal/5 rounded-xl">
                 <div>
                   <span className="text-xs font-bold text-charcoal block">
-                    {user.name}
+                    {user?.name || 'Account'}
                   </span>
                   <span className="text-[11px] text-charcoal-muted">
-                    {user.email || user.phone}
+                    {user?.email || user?.phone || ''}
                   </span>
                 </div>
                 <button

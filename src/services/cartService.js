@@ -11,15 +11,18 @@ export const cartService = {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
       if (!saved) return new Cart([], null, 'pickup');
       const parsed = JSON.parse(saved);
-      const items = (parsed.items || []).map(
-        (raw) =>
-          new CartItem({
-            id: raw.id,
-            menuItem: raw.menuItem,
-            quantity: raw.quantity,
-            selectedAddOns: raw.selectedAddOns || [],
-          })
-      );
+      if (!parsed || !Array.isArray(parsed.items)) return new Cart([], null, 'pickup');
+      const items = (parsed.items || [])
+        .filter((raw) => raw && raw.menuItem)
+        .map(
+          (raw) =>
+            new CartItem({
+              id: raw.id,
+              menuItem: raw.menuItem,
+              quantity: Number(raw.quantity) || 1,
+              selectedAddOns: Array.isArray(raw.selectedAddOns) ? raw.selectedAddOns : [],
+            })
+        );
       return new Cart(items, parsed.promo || null, parsed.orderType || 'pickup');
     } catch {
       return new Cart([], null, 'pickup');
