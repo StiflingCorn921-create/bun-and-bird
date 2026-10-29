@@ -44,3 +44,4 @@ export const menuService = {
     return result;
   },
 };
+

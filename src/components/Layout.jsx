@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { AuthModal } from './AuthModal';
 
 export function Layout({ itemCount }) {
   return (
@@ -10,7 +11,7 @@ export function Layout({ itemCount }) {
         <Outlet />
       </main>
       <Footer />
+      <AuthModal />
     </div>
   );
 }
-

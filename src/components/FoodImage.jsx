@@ -52,3 +52,4 @@ export function FoodImage({ src, alt = 'Food Item', className = '', containerCla
     />
   );
 }
+

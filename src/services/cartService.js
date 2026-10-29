@@ -145,3 +145,4 @@ export const cartService = {
     return new Cart([], null, cart?.orderType || 'pickup');
   },
 };
+

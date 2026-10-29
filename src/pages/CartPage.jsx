@@ -23,14 +23,7 @@ export default function CartPage() {
     clearCart,
   } = useCart();
 
-  const { user, isAuthenticated, login, signup, logout } = useAuth();
-
-  // Auth form state (for inline login/signup when not logged in)
-  const [authTab, setAuthTab] = useState('login'); // 'login' | 'signup'
-  const [authName, setAuthName] = useState('');
-  const [authIdentifier, setAuthIdentifier] = useState('');
-  const [authPassword, setAuthPassword] = useState('');
-  const [authError, setAuthError] = useState('');
+  const { user, isAuthenticated, openAuthModal, logout } = useAuth();
 
   // Form state
   const [customerName, setCustomerName] = useState('');
@@ -95,39 +88,14 @@ export default function CartPage() {
     setPromoMessage({ type: null, text: '' });
   };
 
-  // Handle inline quick auth submit
-  const handleAuthSubmit = (e) => {
-    e.preventDefault();
-    setAuthError('');
-    try {
-      if (authTab === 'login') {
-        const loggedUser = login({
-          identifier: authIdentifier,
-          password: authPassword,
-        });
-        setCustomerName(loggedUser.name || '');
-        setCustomerPhone(loggedUser.phone || '');
-      } else {
-        const newUser = signup({
-          name: authName,
-          email: authIdentifier.includes('@') ? authIdentifier : '',
-          phone: !authIdentifier.includes('@') ? authIdentifier : '',
-          password: authPassword,
-        });
-        setCustomerName(newUser.name);
-        setCustomerPhone(newUser.phone);
-      }
-    } catch (err) {
-      setAuthError(err.message || 'Authentication failed. Please check inputs.');
-    }
-  };
-
   // Form validation
   const validateForm = () => {
     const newErrors = {};
 
     if (!isAuthenticated) {
       newErrors.auth = siteContent.checkout.validationErrors.authRequired;
+      openAuthModal('login');
+      return false;
     }
 
     if (!customerName.trim()) {
@@ -708,100 +676,38 @@ export default function CartPage() {
                 )}
               </div>
 
-              {/* If user is not authenticated: Show simple inline Sign In / Sign Up */}
+              {/* If user is not authenticated: Show friendly prompt to open modal */}
               {!isAuthenticated ? (
-                <div className="p-5 bg-amber-50/70 border-2 border-mustard/40 rounded-2xl space-y-4">
-                  <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-ketchup" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span className="text-sm font-black text-charcoal">
-                      {siteContent.auth.accountRequiredNotice}
-                    </span>
+                <div className="p-5 bg-amber-50/70 border-2 border-mustard/40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-ketchup" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span className="text-sm font-black text-charcoal">
+                        {siteContent.auth.accountRequiredNotice}
+                      </span>
+                    </div>
+                    <p className="text-xs text-charcoal-muted">
+                      Quick sign in or create an account with just your name and password.
+                    </p>
                   </div>
-
-                  {/* Tabs */}
-                  <div className="flex gap-2 border-b border-charcoal/10 pb-2">
-                    <button
+                  <div className="flex gap-2 shrink-0">
+                    <Button
                       type="button"
-                      onClick={() => setAuthTab('login')}
-                      className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                        authTab === 'login'
-                          ? 'bg-charcoal text-cream'
-                          : 'bg-cream text-charcoal-muted hover:text-charcoal'
-                      }`}
+                      variant="primary"
+                      size="sm"
+                      onClick={() => openAuthModal('login')}
                     >
                       {siteContent.auth.tabLogin}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAuthTab('signup')}
-                      className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                        authTab === 'signup'
-                          ? 'bg-charcoal text-cream'
-                          : 'bg-cream text-charcoal-muted hover:text-charcoal'
-                      }`}
-                    >
-                      {siteContent.auth.tabSignup}
-                    </button>
-                  </div>
-
-                  {authError && (
-                    <p className="text-xs font-bold text-red-600">{authError}</p>
-                  )}
-
-                  <div className="space-y-3">
-                    {authTab === 'signup' && (
-                      <div>
-                        <label className="text-xs font-bold text-charcoal-muted block mb-1">
-                          {siteContent.auth.nameLabel}
-                        </label>
-                        <input
-                          type="text"
-                          value={authName}
-                          onChange={(e) => setAuthName(e.target.value)}
-                          placeholder={siteContent.auth.namePlaceholder}
-                          className="w-full px-4 py-2.5 rounded-xl bg-cream border-2 border-charcoal/15 text-sm"
-                        />
-                      </div>
-                    )}
-
-                    <div>
-                      <label className="text-xs font-bold text-charcoal-muted block mb-1">
-                        {siteContent.auth.identifierLabel}
-                      </label>
-                      <input
-                        type="text"
-                        value={authIdentifier}
-                        onChange={(e) => setAuthIdentifier(e.target.value)}
-                        placeholder={siteContent.auth.identifierPlaceholder}
-                        className="w-full px-4 py-2.5 rounded-xl bg-cream border-2 border-charcoal/15 text-sm"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-bold text-charcoal-muted block mb-1">
-                        {siteContent.auth.passwordLabel}
-                      </label>
-                      <input
-                        type="password"
-                        value={authPassword}
-                        onChange={(e) => setAuthPassword(e.target.value)}
-                        placeholder={siteContent.auth.passwordPlaceholder}
-                        className="w-full px-4 py-2.5 rounded-xl bg-cream border-2 border-charcoal/15 text-sm"
-                      />
-                    </div>
-
+                    </Button>
                     <Button
                       type="button"
                       variant="secondary"
                       size="sm"
-                      onClick={handleAuthSubmit}
-                      className="w-full"
+                      onClick={() => openAuthModal('signup')}
                     >
-                      {authTab === 'login'
-                        ? siteContent.auth.loginSubmit
-                        : siteContent.auth.signupSubmit}
+                      {siteContent.auth.tabSignup}
                     </Button>
                   </div>
                 </div>

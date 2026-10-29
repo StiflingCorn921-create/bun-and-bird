@@ -6,12 +6,14 @@ import { useAuth } from '../context/AuthContext';
 
 export function Header({ itemCount: propItemCount }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+
   const { itemCount: contextItemCount } = useCart();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, openAuthModal, logout } = useAuth();
   const itemCount = propItemCount !== undefined ? propItemCount : contextItemCount;
 
   const toggleMobileMenu = () => {
-    setMobileMenuOpen(prev => !prev);
+    setMobileMenuOpen((prev) => !prev);
   };
 
   const closeMobileMenu = () => {
@@ -26,7 +28,7 @@ export function Header({ itemCount: propItemCount }) {
     }`;
 
   return (
-    <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur-md border-b border-charcoal/10 shadow-xs">
+    <header className="sticky top-0 z-40 bg-cream/95 backdrop-blur-md border-b border-charcoal/10 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Brand Logo & Name */}
@@ -67,22 +69,55 @@ export function Header({ itemCount: propItemCount }) {
           {/* Desktop Right CTA: Cart & Account */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
-              <Link
-                to="/cart"
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-charcoal/5 border border-charcoal/10 text-xs font-bold text-charcoal hover:bg-charcoal/10 transition-colors"
-              >
-                <div className="w-6 h-6 rounded-full bg-mustard text-charcoal font-black flex items-center justify-center text-[10px]">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-                <span className="max-w-[100px] truncate">{user.name}</span>
-              </Link>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAccountMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-charcoal/5 border border-charcoal/10 text-xs font-bold text-charcoal hover:bg-charcoal/10 transition-colors cursor-pointer"
+                >
+                  <div className="w-6 h-6 rounded-full bg-mustard text-charcoal font-black flex items-center justify-center text-[10px]">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="max-w-[100px] truncate">{user.name}</span>
+                  <svg className="w-3.5 h-3.5 text-charcoal-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {accountMenuOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-56 bg-cream border-2 border-charcoal/15 rounded-2xl p-3 shadow-xl space-y-2 z-50 animate-in fade-in duration-150"
+                    onMouseLeave={() => setAccountMenuOpen(false)}
+                  >
+                    <div className="px-2 py-1 border-b border-charcoal/10">
+                      <span className="text-xs font-bold text-charcoal block truncate">
+                        {user.name}
+                      </span>
+                      <span className="text-[11px] text-charcoal-muted block truncate">
+                        {user.email || user.phone}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        setAccountMenuOpen(false);
+                      }}
+                      className="w-full text-left px-2 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                    >
+                      {siteContent.auth.logoutBtn}
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
-              <Link
-                to="/cart"
-                className="text-xs font-bold text-charcoal-muted hover:text-ketchup px-2 py-1 transition-colors"
+              <button
+                type="button"
+                onClick={() => openAuthModal('login')}
+                className="text-xs font-bold text-charcoal hover:text-ketchup px-3 py-2 rounded-xl hover:bg-charcoal/5 transition-colors cursor-pointer"
               >
                 {siteContent.nav.login}
-              </Link>
+              </button>
             )}
 
             <NavLink
@@ -152,7 +187,7 @@ export function Header({ itemCount: propItemCount }) {
               type="button"
               onClick={toggleMobileMenu}
               aria-label={mobileMenuOpen ? siteContent.nav.closeMenuAria : siteContent.nav.openMenuAria}
-              className="p-2.5 rounded-xl text-charcoal hover:bg-charcoal/10 focus:outline-none focus:ring-2 focus:ring-ketchup active:scale-95 transition-transform"
+              className="p-2.5 rounded-xl text-charcoal hover:bg-charcoal/10 focus:outline-none focus:ring-2 focus:ring-ketchup active:scale-95 transition-transform cursor-pointer"
             >
               <svg
                 className="w-6 h-6"
@@ -226,6 +261,43 @@ export function Header({ itemCount: propItemCount }) {
               </span>
             )}
           </NavLink>
+
+          {/* Mobile Auth button */}
+          <div className="pt-2 border-t border-charcoal/10">
+            {isAuthenticated ? (
+              <div className="flex items-center justify-between p-3 bg-charcoal/5 rounded-xl">
+                <div>
+                  <span className="text-xs font-bold text-charcoal block">
+                    {user.name}
+                  </span>
+                  <span className="text-[11px] text-charcoal-muted">
+                    {user.email || user.phone}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    closeMobileMenu();
+                  }}
+                  className="text-xs font-bold text-red-600 hover:underline cursor-pointer"
+                >
+                  {siteContent.auth.logoutBtn}
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  closeMobileMenu();
+                  openAuthModal('login');
+                }}
+                className="w-full py-3 rounded-xl bg-charcoal text-cream font-bold text-sm text-center cursor-pointer"
+              >
+                {siteContent.nav.login} / {siteContent.auth.tabSignup}
+              </button>
+            )}
+          </div>
         </div>
       )}
     </header>
